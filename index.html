@@ -124,7 +124,7 @@
 
     .product-grid {
       display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+      grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
       gap: 20px;
       padding: 20px;
       min-height: 200px; /* Prevent layout shift */
@@ -172,9 +172,19 @@
 
     /* Mobile styles */
     @media (max-width: 768px) {
-      .product-grid.few-items {
-        grid-template-columns: repeat(2, minmax(140px, 1fr));
+      .product-grid {
+        grid-template-columns: repeat(2, 1fr);
         gap: 10px;
+        padding: 10px;
+      }
+
+      .product-grid.few-items {
+        grid-template-columns: repeat(2, 1fr);
+      }
+
+      .product-card {
+        min-width: 0; /* Allow cards to shrink */
+        width: 100%;
       }
 
       .filters-container {
@@ -240,7 +250,7 @@
     /* Even smaller screens */
     @media (max-width: 480px) {
       .product-grid {
-        grid-template-columns: repeat(2, minmax(140px, 1fr)) !important;
+        grid-template-columns: repeat(2, 1fr);
         gap: 8px;
         padding: 6px;
       }
@@ -503,7 +513,7 @@
         padding: 0; /* Remove padding on mobile */
       }
 
-      .weight-info{
+      weight-info{
         gap: 5px!important;
       }
       
@@ -892,7 +902,116 @@
       text-transform: capitalize;
       z-index: 4;
     }
+
+    /* Add these styles in the <style> section */
+    .countdown-container {
+      position: fixed;
+      top: 20px;
+      right: 20px;
+      width: 40px;
+      height: 40px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background-color: var(--bg-elevated);
+      border-radius: 50%;
+      box-shadow: var(--shadow-normal);
+      cursor: pointer;
+      z-index: 999;
+      padding: 2px;
+    }
+
+    .countdown-circle {
+      width: 100%;
+      height: 100%;
+      position: relative;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .countdown-circle svg {
+      position: absolute;
+      width: 100%;
+      height: 100%;
+      transform: rotate(-90deg);
+    }
+
+    .countdown-circle circle {
+      fill: none;
+      stroke-width: 2.5;
+      stroke-linecap: round;
+    }
+
+    .countdown-circle circle.progress-bg {
+      stroke: var(--bg-secondary);
+    }
+
+    .countdown-circle circle.progress {
+      stroke: var(--accent-primary);
+      transition: stroke-dashoffset 1s linear;
+    }
+
+    .countdown-time {
+      position: relative;
+      font-size: 10px;
+      color: var(--text-primary);
+      font-family: monospace;
+      z-index: 1;
+    }
+
+    @media (max-width: 768px) {
+      .countdown-container {
+        top: 15px;
+        right: 15px;
+      }
+    }
+
+    .countdown-container:hover .countdown-tooltip {
+      opacity: 1;
+      visibility: visible;
+      transform: translateX(-100%) translateY(-50%);
+    }
+
+    .countdown-tooltip {
+      position: absolute;
+      right: calc(100% + 10px);
+      top: 50%;
+      transform: translateX(-90%) translateY(-50%);
+      background-color: var(--bg-elevated);
+      color: var(--text-primary);
+      padding: 8px 12px;
+      border-radius: 6px;
+      font-size: 12px;
+      white-space: nowrap;
+      opacity: 0;
+      visibility: hidden;
+      transition: all 0.2s ease;
+      box-shadow: var(--shadow-normal);
+    }
+
+    .countdown-tooltip:after {
+      content: '';
+      position: absolute;
+      right: -6px;
+      top: 50%;
+      transform: translateY(-50%);
+      border-left: 6px solid var(--bg-elevated);
+      border-top: 6px solid transparent;
+      border-bottom: 6px solid transparent;
+    }
   </style>
+  <!-- Add this right after the settings button, before the settings modal -->
+  <div class="countdown-container">
+    <div class="countdown-tooltip">Next check in: <span class="tooltip-time">5:00</span></div>
+    <div class="countdown-circle">
+      <svg viewBox="0 0 36 36">
+        <circle class="progress-bg" r="16" cx="18" cy="18"></circle>
+        <circle class="progress" r="16" cx="18" cy="18" stroke-dasharray="100.53" stroke-dashoffset="0"></circle>
+      </svg>
+      <div class="countdown-time">5:00</div>
+    </div>
+  </div>
 </head>
 <body>
   <div class="header">
@@ -1012,15 +1131,35 @@
       return currentSettings;
     }
 
+    // Update saveSettings function to properly handle timer reset
     function saveSettings(settings) {
+      const oldInterval = currentSettings.checkInterval;
+      const newInterval = settings.checkInterval;
+      
       localStorage.setItem('litFarmsNotificationSettings', JSON.stringify(settings));
       currentSettings = settings;
       
-      // Update the update checker interval
-      if (updateCheckerId) {
-        clearInterval(updateCheckerId);
+      // Only restart timers if the interval changed
+      if (oldInterval !== newInterval) {
+        // Clear existing intervals
+        if (updateCheckerId) {
+          clearInterval(updateCheckerId);
+          updateCheckerId = null;
+        }
+        
+        // Clear all existing cleanup handlers
+        pageCleanupHandlers.forEach(handler => {
+          try {
+            handler();
+          } catch (error) {
+            console.warn('Cleanup handler error:', error);
+          }
+        });
+        pageCleanupHandlers = [];
+        
+        // Start new product checker and countdown
+        startProductUpdateChecker();
       }
-      startProductUpdateChecker();
     }
 
     // Strain data
@@ -2043,19 +2182,21 @@
     // Update the startProductUpdateChecker function
     function startProductUpdateChecker() {
       let lastProducts = products;
-      const intervalMs = currentSettings.checkInterval * 60 * 1000; // Convert minutes to milliseconds
+      const intervalMs = currentSettings.checkInterval * 60 * 1000;
 
       console.log(`Starting product update checker - checking every ${currentSettings.checkInterval} minutes`);
 
+      // Start the countdown timer and get cleanup function
+      const countdownCleanup = startCountdownTimer(intervalMs);
+      
+      // Add countdown timer cleanup to pageCleanupHandlers
+      pageCleanupHandlers.push(countdownCleanup);
+
       updateCheckerId = setInterval(async () => {
         try {
-          //console.log('Checking for product updates...');
           const freshProducts = await getProducts();
-          
-          // Always perform change detection
           const changes = detectProductChanges(lastProducts, freshProducts);
           
-          // Only update state and send notifications if there are actual changes
           if (changes.new.length > 0 || changes.stockChanged.length > 0 || changes.removed.length > 0) {
             console.log('Changes detected, updating state and sending notifications...');
             await handleNotifications(changes);
@@ -2064,7 +2205,6 @@
             filterProducts();
             updateProductSelectList();
           }
-          
         } catch (error) {
           console.error('Error checking for product updates:', error);
         }
@@ -2097,8 +2237,32 @@
       }));
     }
 
-    // Update the attemptLoad function
+    // Add cleanup handler for page unload
+    let pageCleanupHandlers = [];
+    
+    window.addEventListener('beforeunload', () => {
+      // Execute all cleanup handlers
+      pageCleanupHandlers.forEach(handler => {
+        try {
+          handler();
+        } catch (error) {
+          console.warn('Cleanup handler error:', error);
+        }
+      });
+    });
+
+    // Update attemptLoad function with cleanup
     async function attemptLoad() {
+      let imagePreloadAbortController = new AbortController();
+      
+      // Add cleanup handler
+      pageCleanupHandlers.push(() => {
+        imagePreloadAbortController.abort();
+        if (updateCheckerId) {
+          clearInterval(updateCheckerId);
+        }
+      });
+
       try {
         // Load notification settings first
         loadSettings();
@@ -2107,7 +2271,6 @@
         products = await getProducts(true);
         
         if (Array.isArray(products) && products.length > 0) {
-          // We have cached products, show them immediately
           console.log(`Loaded ${products.length} cached THCA products`);
           loadFilterState();
           await loadStrainData();
@@ -2117,11 +2280,16 @@
           filterProducts();
           
           // Then check for updates in the background
-          const updatedProducts = await getProducts(false);
-          if (JSON.stringify(products) !== JSON.stringify(updatedProducts)) {
-            console.log('Products updated, refreshing display');
-            products = updatedProducts;
-            filterProducts();
+          try {
+            const updatedProducts = await getProducts(false);
+            if (JSON.stringify(products) !== JSON.stringify(updatedProducts)) {
+              console.log('Products updated, refreshing display');
+              products = updatedProducts;
+              filterProducts();
+            }
+          } catch (updateError) {
+            console.warn('Background update failed:', updateError);
+            // Continue with cached data
           }
         } else {
           // No cached products, load fresh
@@ -2134,12 +2302,19 @@
           loadFilterState();
           await loadStrainData();
           
-          // Preload images before showing fresh products
-          const filteredProducts = products.filter(() => true);
-          await Promise.race([
-            preloadImages(filteredProducts),
-            new Promise(resolve => setTimeout(resolve, 5000))
-          ]);
+          // Preload images with timeout and abort controller
+          try {
+            const filteredProducts = products.filter(() => true);
+            await Promise.race([
+              preloadImages(filteredProducts, imagePreloadAbortController.signal),
+              new Promise((_, reject) => {
+                setTimeout(() => reject(new Error('Image preload timeout')), 5000);
+              })
+            ]);
+          } catch (preloadError) {
+            console.warn('Image preload incomplete:', preloadError);
+            // Continue without complete preload
+          }
           
           toggleLoader(false);
           filterProducts();
@@ -2183,6 +2358,28 @@
           </div>`;
         toggleLoader(false);
       }
+    }
+
+    // Update preloadImages function to accept abort signal
+    function preloadImages(products, signal) {
+      return Promise.all(products.map(product => {
+        if (!product.images[0]?.src) return Promise.resolve();
+        return new Promise((resolve, reject) => {
+          const img = new Image();
+          
+          // Handle abort signal
+          if (signal) {
+            signal.addEventListener('abort', () => {
+              img.src = '';
+              resolve(); // Resolve instead of reject to avoid error logging
+            });
+          }
+          
+          img.onload = () => resolve();
+          img.onerror = () => resolve(); // Resolve on error to continue loading
+          img.src = product.images[0].src;
+        });
+      }));
     }
 
     // Document ready event listener
@@ -2831,6 +3028,66 @@
         default:
           data ? console.log(logMessage, data) : console.log(logMessage);
       }
+    }
+
+    // Update startCountdownTimer function for better state management
+    function startCountdownTimer(intervalMs) {
+      const countdownEl = document.querySelector('.countdown-time');
+      const tooltipTimeEl = document.querySelector('.tooltip-time');
+      const progressCircle = document.querySelector('.progress');
+      const circumference = 2 * Math.PI * 16; // r = 16
+      
+      // Reset all visual elements first
+      progressCircle.style.strokeDasharray = circumference;
+      progressCircle.style.strokeDashoffset = 0;
+      countdownEl.textContent = '';
+      tooltipTimeEl.textContent = '';
+      
+      let timeLeft = intervalMs;
+      let timerId = null;
+      let isActive = true; // Track if this timer instance is active
+      
+      function updateCountdown() {
+        // Only update if this timer instance is still active
+        if (!isActive) return;
+        
+        const minutes = Math.floor(timeLeft / 60000);
+        const seconds = Math.floor((timeLeft % 60000) / 1000);
+        const display = `${minutes}:${seconds.toString().padStart(2, '0')}`;
+        
+        countdownEl.textContent = display;
+        tooltipTimeEl.textContent = display;
+        
+        // Update progress circle
+        const progress = (timeLeft / intervalMs) * 100;
+        const offset = circumference - (progress / 100) * circumference;
+        progressCircle.style.strokeDashoffset = offset;
+        
+        timeLeft -= 1000;
+        
+        if (timeLeft < 0) {
+          timeLeft = intervalMs;
+        }
+      }
+      
+      // Initial update
+      updateCountdown();
+      
+      // Start the interval
+      timerId = setInterval(updateCountdown, 1000);
+      
+      // Return cleanup function
+      return () => {
+        isActive = false; // Mark this timer instance as inactive
+        if (timerId) {
+          clearInterval(timerId);
+          timerId = null;
+        }
+        // Reset visual elements on cleanup
+        countdownEl.textContent = '';
+        tooltipTimeEl.textContent = '';
+        progressCircle.style.strokeDashoffset = 0;
+      };
     }
   </script>
 
