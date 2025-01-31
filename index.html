@@ -845,6 +845,53 @@
     .header-link:hover {
       opacity: 0.8;
     }
+
+    /* Add these styles to the existing <style> section */
+    .product-image-container {
+      position: relative;
+      width: 100%;
+      border-radius: 10px;
+      overflow: hidden;
+      margin-bottom: 10px;
+    }
+
+    .image-wrapper {
+      position: relative;
+      width: 100%;
+      padding-top: 100%; /* 1:1 Aspect Ratio */
+      overflow: hidden;
+    }
+
+    .product-image {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      object-fit: cover; /* This will maintain aspect ratio while filling the container */
+      transition: transform 0.3s ease;
+    }
+
+    .product-image-container:hover .image-nav {
+      opacity: 1;
+    }
+
+    /* Add focus styles for keyboard navigation */
+    .product-image-container:focus {
+      outline: 2px solid var(--accent-primary);
+      outline-offset: 2px;
+    }
+
+
+    .strain-type-badge {
+      position: absolute;
+      top: 10px;
+      right: 10px;
+      padding: 5px 10px;
+      border-radius: 15px;
+      text-transform: capitalize;
+      z-index: 4;
+    }
   </style>
 </head>
 <body>
@@ -1276,11 +1323,8 @@
             }
 
             // Create and add product image
-            const image = document.createElement('img');
-            image.className = 'product-image';
-            image.alt = product.title;
-            image.src = product.images[0]?.src || 'https://via.placeholder.com/300';
-            productCard.appendChild(image);
+            const imageContainer = createProductImage(product, relevantVariants);
+            productCard.appendChild(imageContainer);
 
             const productTitle = createProductTitle(product);
             productCard.appendChild(productTitle);
@@ -1310,12 +1354,7 @@
     // Helper functions for rendering
     function createStrainTypeBadge(strainType) {
       const badge = document.createElement('div');
-      badge.style.position = 'absolute';
-      badge.style.top = '10px';
-      badge.style.right = '10px';
-      badge.style.padding = '5px 10px';
-      badge.style.borderRadius = '15px';
-      badge.style.textTransform = 'capitalize';
+      badge.className = 'strain-type-badge';
       
       // Set badge color based on strain type
       switch(strainType) {
@@ -1340,12 +1379,53 @@
       return badge;
     }
 
-    function createProductImage(product) {
+    function createProductImage(product, relevantVariants) {
+      const imageContainer = document.createElement('div');
+      imageContainer.className = 'product-image-container';
+      
+      const imageWrapper = document.createElement('div');
+      imageWrapper.className = 'image-wrapper';
+      
       const image = document.createElement('img');
-      image.src = product.images[0]?.src || 'https://via.placeholder.com/300';
-      image.alt = product.title;
       image.className = 'product-image';
-      return image;
+      image.alt = product.title;
+      
+      imageWrapper.appendChild(image);
+      imageContainer.appendChild(imageWrapper);
+
+      // Filter images based on variants
+      let filteredImages = [];
+      if (product.images && product.images.length > 0) {
+        if (relevantVariants.length === product.variants.length) {
+          // Show all images if all variants are selected
+          filteredImages = [product.images[0]]; // Just use first image
+        } else {
+          // Get set of relevant variant IDs
+          const relevantVariantIds = new Set(relevantVariants.map(v => v.id));
+          
+          // Try to find first image that matches a variant
+          const variantImage = product.images.find(img => 
+            img.variant_ids && 
+            img.variant_ids.some(id => relevantVariantIds.has(id))
+          );
+          
+          // Use variant image if found, otherwise use first product image
+          filteredImages = [variantImage || product.images[0]];
+        }
+      }
+
+      // Use placeholder if no images available
+      if (filteredImages.length === 0) {
+        filteredImages = [{ src: 'https://via.placeholder.com/300' }];
+      }
+
+      // Set the image source
+      image.src = filteredImages[0].src;
+
+      // Remove tabIndex and keyboard handlers since we're not navigating images
+      imageContainer.removeAttribute('tabIndex');
+
+      return imageContainer;
     }
 
     function createProductTitle(product) {
