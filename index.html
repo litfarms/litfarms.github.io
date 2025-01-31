@@ -1,0 +1,2902 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0">
+  <title>LitFarms Product List</title>
+  <!-- Replace favicon with inline SVG -->
+  <link rel="icon" href="data:image/svg+xml,<?xml version='1.0' encoding='UTF-8' standalone='no'?><svg width='4.6079073in' height='2.5213542in' viewBox='0 0 117.04084 64.042396' version='1.1' id='svg1' xml:space='preserve' xmlns='http://www.w3.org/2000/svg'><defs id='defs1'/><g id='layer1' transform='translate(-46.479583,-116.4788)'><rect style='display:inline;opacity:1;fill:none;fill-opacity:1;stroke:%23ffffff;stroke-width:6;stroke-dasharray:none;stroke-opacity:1' id='rect2' width='111.04084' height='58.0424' x='49.47958' y='119.4788'/><g id='g6' style='opacity:1;fill:%23ffffff;fill-opacity:1' transform='matrix(1,0,0,1.0224587,0.56861157,30.651474)'><rect style='opacity:1;fill:%23ffffff;fill-opacity:1;stroke:none;stroke-width:6.57396;stroke-dasharray:none;stroke-opacity:1' id='rect5' width='25.801872' height='5.860003' x='119.94384' y='98.674728' ry='0'/><rect style='opacity:1;fill:%23ffffff;fill-opacity:1;stroke:none;stroke-width:6.03661;stroke-dasharray:none;stroke-opacity:1' id='rect6' width='6' height='30.334635' x='130.05539' y='101.46412'/></g><path style='opacity:1;fill:%23ffffff;fill-opacity:1;stroke:none;stroke-width:5.81338;stroke-dasharray:none;stroke-opacity:1' d='m 100.03961,131.46649 h 6 v 33.97218 h -6 z' id='path4'/><g id='g9' transform='matrix(1,0,0,1.0199169,-0.14807164,31.087934)'><rect style='opacity:1;fill:%23ffffff;fill-opacity:1;stroke:none;stroke-width:5.43999;stroke-dasharray:none;stroke-opacity:1' id='rect8' width='6' height='33.229393' x='64.364632' y='98.429321'/><rect style='opacity:1;fill:%23ffffff;fill-opacity:1;stroke:none;stroke-width:5.84555;stroke-dasharray:none;stroke-opacity:1' id='rect9' width='21.184687' height='5.8828321' x='64.373192' y='125.75582'/></g></g></svg>">
+  <style>
+    :root {
+      /* Theme Colors */
+      --bg-primary: #0a0d14;      /* Dark navy background */
+      --bg-secondary: #141a24;    /* Lighter navy for cards */
+      --bg-elevated: #1c2433;     /* Elevated elements */
+      
+      /* Accent Colors */
+      --accent-primary: #60a5fa;    /* Bright blue */
+      --accent-secondary: #38bdf8;  /* Sky blue */
+      --accent-tertiary: #2464b1;  /* Darker blue */
+      --accent-danger: #f43f5e;     /* Coral red */
+      
+      /* Text Colors */
+      --text-primary: #ffffff;
+      --text-secondary: #e2e8f0;
+      --text-muted: #94a3b8;
+      
+      /* Status Colors */
+      --status-success: #22c55e;    /* Emerald green */
+      --status-error: #f43f5e;      /* Coral red */
+      
+      /* Strain Type Colors */
+      --strain-sativa: #fbbf24;     /* Warm amber */
+      --strain-indica: #8b5cf6;     /* Soft purple */
+      --strain-hybrid: #34d399;     /* Emerald */
+      --strain-unknown: #64748b;    /* Slate */
+      
+      /* Effects */
+      --shadow-normal: 0 4px 8px rgba(0, 0, 0, 0.3);
+      --shadow-hover: 0 0 25px rgba(96, 165, 250, 0.2);  /* Blue glow */
+      --border-glow: rgba(96, 165, 250, 0.3);           /* Blue border */
+      
+      /* Modal */
+      --modal-overlay: rgba(0, 0, 0, 0.7);
+    }
+
+    body {
+      background-color: var(--bg-primary);
+      color: var(--text-primary);
+      font-family: Arial, sans-serif;
+      margin: 0;
+      padding: 20px;
+    }
+
+    h1 {
+      text-align: center;
+      color: var(--accent-primary);
+    }
+
+    .filters-container {
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      background-color: var(--bg-primary);
+      padding: 10px 0;
+      margin-bottom: 10px;
+      /* Add subtle shadow for depth */
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+    }
+
+    .filters {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      justify-content: center;
+    }
+
+    .filters select, .filters button {
+      padding: 10px;
+      border-radius: 5px;
+      border: 1px solid var(--accent-primary);
+      background-color: var(--bg-secondary);
+      color: var(--text-primary);
+      cursor: pointer;
+      min-width: auto;
+      transition: all 0.3s ease;
+      outline: none; /* Remove default focus outline */
+    }
+
+    /* Custom focus style */
+    .filters select:focus {
+      box-shadow: 0 0 0 2px var(--bg-primary), 0 0 0 4px var(--accent-primary);
+      border-color: var(--accent-primary);
+    }
+
+    /* Style for select elements when a non-default option is selected */
+    .filters select.has-selection {
+      background-color: var(--accent-tertiary);
+      border-color: var(--text-primary);
+      color: var(--text-primary);
+      box-shadow: 0 0 10px rgba(96, 165, 250, 0.3);
+      font-weight: 500;
+    }
+
+    /* Custom focus style for selected state */
+    .filters select.has-selection:focus {
+      box-shadow: 0 0 0 2px var(--bg-primary), 0 0 0 4px var(--accent-primary);
+    }
+
+    .filters button.active {
+      background-color: var(--bg-secondary);
+      color: var(--status-error);
+      border-color: var(--status-error);
+    }
+
+    .filters button:not(.active) {
+      background-color: var(--bg-elevated);
+      color: var(--accent-danger);
+      border-color: var(--accent-danger);
+    }
+    .filters button:not(.active):hover {
+      background-color: var(--border-glow);
+
+    }
+
+    .product-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+      gap: 20px;
+      padding: 20px;
+      min-height: 200px; /* Prevent layout shift */
+      max-width: 1200px; /* Add max-width for better control */
+      margin: 0 auto; /* Center the grid */
+    }
+
+    /* Add a new class for when there are few items */
+    .product-grid.few-items {
+      grid-template-columns: repeat(auto-fit, minmax(250px, 300px));
+      justify-content: center;
+    }
+
+    .product-card {
+      background-color: var(--bg-secondary);
+      border-radius: 10px;
+      padding: 15px;
+      box-shadow: var(--shadow-normal);
+      transition: all 0.3s ease;
+      max-width: 100%;
+      margin: 0 auto;
+      cursor: pointer;
+      border: 1px solid transparent;
+      opacity: 0;
+      transform: translateY(10px);
+      animation: fadeInUp 0.3s ease forwards;
+    }
+
+    @keyframes fadeInUp {
+      from {
+        opacity: 0;
+        transform: translateY(10px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    .product-card.fade-out {
+      opacity: 0;
+      transform: translateY(-10px);
+      transition: opacity 0.2s ease, transform 0.2s ease;
+    }
+
+    /* Mobile styles */
+    @media (max-width: 768px) {
+      .product-grid.few-items {
+        grid-template-columns: repeat(2, minmax(140px, 1fr));
+        gap: 10px;
+      }
+
+      .filters-container {
+        padding: 8px 0;
+      }
+
+      .filters {
+        gap: 8px;
+      }
+
+      .filters select, .filters button {
+        font-size: 0.9em;
+        padding: 8px;
+        min-width: auto;
+      }
+
+      .product-grid {
+        grid-template-columns: repeat(2, minmax(140px, 1fr));
+        gap: 10px;
+        padding: 8px;
+      }
+
+      .product-card {
+        padding: 8px;
+        font-size: 0.9em;
+      }
+
+      .product-title {
+        font-size: 1em !important;
+        margin: 6px 0 !important;
+      }
+
+      .product-description {
+        display: none; /* Hide descriptions on mobile */
+      }
+
+      .price-container {
+        margin: 8px 0 !important;
+        padding: 6px !important;
+      }
+
+      .variant-price {
+        margin: 4px 0 !important;
+        padding: 2px 0 !important;
+      }
+
+      .stock-badge {
+        font-size: 0.7em !important;
+        margin-left: 4px !important;
+        min-width: 55px!important;
+      }
+
+      .variant-info div {
+        font-size: 0.9em !important;
+      }
+      .weight-row {
+        padding: 0px!important;
+        gap: 0px!important;
+        justify-content: center;
+      }
+    }
+
+    /* Even smaller screens */
+    @media (max-width: 480px) {
+      .product-grid {
+        grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+        gap: 8px;
+        padding: 6px;
+      }
+
+      .product-card {
+        padding: 6px;
+        font-size: 0.85em;
+        max-width: 95%;
+      }
+
+      .variant-info div {
+        font-size: 0.85em !important;
+      }
+      .weight-row {
+        padding: 0px!important;
+        gap: 5px!important;
+      }
+      .stock-badge{
+        min-width: 55px!important;
+
+      }
+        
+    }
+
+    .product-card:hover {
+      transform: scale(1.025);
+      box-shadow: var(--shadow-hover);
+      border-color: var(--border-glow);
+    }
+
+    .product-image {
+      width: 100%;
+      border-radius: 10px;
+    }
+
+    .product-title {
+      font-size: 1.5em;
+      margin: 10px 0;
+      color: var(--accent-primary);
+    }
+
+    .product-price {
+      font-size: 1.2em;
+      color: var(--accent-secondary);
+    }
+
+    .product-description {
+      font-size: 0.9em;
+      color: var(--text-muted);
+      margin: 10px 0;
+    }
+
+    .out-of-stock {
+      color: var(--status-error);
+      font-weight: bold;
+    }
+
+    .price-container {
+      margin: 15px 0;
+      padding: 10px;
+      border-radius: 8px;
+      background-color: var(--bg-elevated);
+      font-size: .75em;
+    }
+
+    .variant-section {
+      margin-bottom: 12px;
+      padding-bottom: 12px;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    }
+
+    .variant-section:last-child {
+      margin-bottom: 0;
+      padding-bottom: 0;
+      border-bottom: none;
+    }
+
+    .variant-title {
+      font-size: 1.4em;
+      color: var(--text-primary);
+      margin-bottom: 8px;
+      padding-bottom: 4px;
+      border-bottom: 1px solid var(--accent-primary);
+    }
+
+    .variant-weights {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    .weight-row {
+      display: flex;
+      justify-content: space-evenly;
+      align-items: center;
+      padding: 6px 8px;
+    }
+
+    .weight-info {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .weight-label {
+      font-size: 1em;
+      color: var(--text-primary);
+    }
+
+    .weight-price {
+      font-size: 1.25em;
+      color: var(--strain-sativa);
+      font-weight: bold;
+      font-family: monospace;
+      border: 1px solid;
+      padding: 1px 4px;
+      box-shadow: inset 0px 0px 5px 0px var(--strain-sativa), 0px 0px 5px 1px var(--strain-sativa);
+      border-radius: 5px;
+    }
+
+    .stock-badge {
+      padding: 6px 0px;
+      border-radius: 6px;
+      font-size: 0.6em;
+      font-weight: bold;
+      text-transform: uppercase;
+      min-width: 80px;
+      text-align: center;
+    }
+
+    .in-stock-badge {
+      background-color: rgba(34, 197, 94, 0.2);
+      color: var(--status-success);
+    }
+
+    .out-of-stock-badge {
+      background-color: rgba(244, 63, 94, 0.2);
+      color: var(--status-error);
+    }
+
+    #product-count {
+      text-align: center;
+      margin: 15px 0;
+      color: var(--accent-secondary);
+      font-size: 1.1em;
+    }
+
+    /* Loading Animation */
+    .loader-container {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 40px;
+      gap: 20px;
+    }
+
+    .loader {
+      width: 48px;
+      height: 48px;
+      border: 3px solid var(--bg-elevated);
+      border-radius: 50%;
+      display: inline-block;
+      position: relative;
+      box-sizing: border-box;
+      animation: rotation 1s linear infinite;
+    }
+
+    .loader::after {
+      content: '';  
+      box-sizing: border-box;
+      position: absolute;
+      left: 50%;
+      top: 50%;
+      transform: translate(-50%, -50%);
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      border: 3px solid transparent;
+      border-bottom-color: var(--accent-primary);
+    }
+
+    .loader-text {
+      color: var(--text-secondary);
+      font-size: 1.1em;
+    }
+
+    @keyframes rotation {
+      0% {
+        transform: rotate(0deg);
+      }
+      100% {
+        transform: rotate(360deg);
+      }
+    }
+
+    /* Settings Button */
+    #settings-button {
+      position: fixed;
+      bottom: 20px;
+      right: 20px;
+      background-color: var(--accent-primary);
+      color: var(--bg-primary);
+      border: none;
+      border-radius: 50%;
+      width: 50px;
+      height: 50px;
+      cursor: pointer;
+      box-shadow: var(--shadow-normal);
+      transition: all 0.3s ease;
+      z-index: 1000;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 0;
+    }
+
+    #settings-button svg {
+      width: 24px;
+      height: 24px;
+      fill: none;
+      stroke: currentColor;
+      stroke-width: 2;
+    }
+
+    #settings-button:hover {
+      transform: scale(1.1);
+      box-shadow: var(--shadow-hover);
+    }
+
+    /* Modal Styles */
+    .modal-overlay {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background-color: var(--modal-overlay);
+      z-index: 1001;
+      align-items: flex-start; /* Change from center to flex-start */
+      justify-content: center;
+      overflow-y: auto; /* Add scroll to overlay */
+      padding: 20px 0; /* Add some padding top and bottom */
+    }
+
+    .modal {
+      background-color: var(--bg-secondary);
+      border-radius: 10px;
+      padding: 20px;
+      width: 90%;
+      max-width: 600px;
+      max-height: none; /* Remove max-height constraint */
+      position: relative;
+      box-shadow: var(--shadow-normal);
+      margin: 20px 0; /* Add margin to ensure spacing at top and bottom */
+    }
+
+    /* Add mobile-specific modal styles */
+    @media (max-width: 768px) {
+      .modal-overlay {
+        padding: 0; /* Remove padding on mobile */
+      }
+
+      .weight-info{
+        gap: 5px!important;
+      }
+      
+      .modal {
+        width: 100%; /* Full width on mobile */
+        border-radius: 0; /* Remove border radius on mobile */
+        margin: 0; /* Remove margin on mobile */
+        min-height: 100vh; /* Ensure it takes full height */
+      }
+
+      .modal-header {
+        position: sticky; /* Make header sticky */
+        top: 0;
+        background-color: var(--bg-secondary);
+        z-index: 1;
+        padding-top: 10px;
+      }
+
+      .save-settings {
+        position: sticky; /* Make save button sticky */
+        bottom: 0;
+        margin-top: 20px;
+        padding: 15px 20px;
+        border-radius: 0;
+      }
+    }
+
+    body.modal-open {
+      overflow: hidden;
+    }
+
+    .modal-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 20px;
+      padding-bottom: 10px;
+      border-bottom: 1px solid var(--border-glow);
+    }
+
+    .modal-title {
+      color: var(--accent-primary);
+      margin: 0;
+      font-size: 1.5em;
+    }
+
+    .close-modal {
+      background: none;
+      border: none;
+      color: var(--text-muted);
+      font-size: 24px;
+      cursor: pointer;
+      padding: 0;
+    }
+
+    .close-modal:hover {
+      color: var(--text-primary);
+    }
+
+    .settings-section {
+      margin-bottom: 20px;
+      padding: 15px;
+      background-color: var(--bg-elevated);
+      border-radius: 8px;
+    }
+
+    .settings-section h3 {
+      color: var(--accent-secondary);
+      margin-top: 0;
+      margin-bottom: 15px;
+    }
+
+    .settings-select {
+      display: block;
+      width: 100%;
+      background-color: var(--bg-secondary);
+      color: var(--text-primary);
+      border: 1px solid var(--border-glow);
+      border-radius: 4px;
+      padding: 8px;
+      margin-bottom: 15px;
+      font-size: 14px;
+      -webkit-appearance: none;
+      -moz-appearance: none;
+      appearance: none;
+    }
+
+    .settings-select:not([multiple]) {
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='none' stroke='%2360a5fa' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
+      background-repeat: no-repeat;
+      background-position: right 8px center;
+      background-size: 16px;
+      padding-right: 32px;
+    }
+
+    .settings-select[multiple] {
+      height: auto;
+      min-height: 120px;
+      padding: 0;
+    }
+
+    .settings-select option {
+      padding: 8px 12px;
+      background-color: var(--bg-secondary);
+      color: var(--text-primary);
+      border-bottom: 1px solid var(--border-glow);
+    }
+
+    .settings-select option:last-child {
+      border-bottom: none;
+    }
+
+    .settings-select option:checked {
+      background: var(--accent-primary);
+      color: var(--bg-primary);
+    }
+
+    /* Safari-specific styles */
+    @media screen and (-webkit-min-device-pixel-ratio: 0) {
+      _::-webkit-full-page-media, _:future, :root .settings-select[multiple] {
+        border: 1px solid var(--border-glow);
+        border-radius: 4px;
+        background: var(--bg-secondary);
+      }
+
+      _::-webkit-full-page-media, _:future, :root .settings-select[multiple] option {
+        padding: 8px 12px;
+        background: var(--bg-secondary);
+        color: var(--text-primary);
+      }
+
+      _::-webkit-full-page-media, _:future, :root .settings-select[multiple] option:checked {
+        background: var(--accent-primary);
+        color: var(--bg-primary);
+      }
+    }
+
+    .save-settings {
+      background-color: var(--accent-primary);
+      color: var(--bg-primary);
+      border: none;
+      padding: 10px 20px;
+      border-radius: 5px;
+      cursor: pointer;
+      width: 100%;
+      font-weight: bold;
+      transition: all 0.3s ease;
+    }
+
+    .save-settings:hover {
+      background-color: var(--accent-secondary);
+    }
+
+    /* Product Selection */
+    .product-select-container {
+      max-height: 200px;
+      overflow-y: auto;
+      margin-bottom: 10px;
+      padding: 10px;
+      background-color: var(--bg-secondary);
+      border-radius: 4px;
+    }
+
+    .product-search {
+      margin-bottom: 10px;
+      position: relative;
+    }
+
+    .product-search input {
+      width: 100%;
+      padding: 8px 32px 8px 12px;
+      border: 1px solid var(--border-glow);
+      border-radius: 4px;
+      background-color: var(--bg-secondary);
+      color: var(--text-primary);
+      font-size: 14px;
+      box-sizing: border-box;
+    }
+
+    .product-search input:focus {
+      outline: none;
+      border-color: var(--accent-primary);
+    }
+
+    .product-search::after {
+      content: "";
+      position: absolute;
+      right: 10px;
+      top: 50%;
+      transform: translateY(-50%);
+      pointer-events: none;
+      width: 16px;
+      height: 16px;
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='%2394a3b8'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z'%3E%3C/path%3E%3C/svg%3E");
+      background-repeat: no-repeat;
+      background-position: center;
+      background-size: contain;
+    }
+
+    .product-select-item {
+      display: flex;
+      align-items: center;
+      padding: 8px 10px;
+      border-bottom: 1px solid var(--border-glow);
+      transition: all 0.2s ease;
+      cursor: pointer;
+    }
+
+    .product-select-item:hover {
+      background-color: var(--bg-elevated);
+    }
+
+    .product-select-item:last-child {
+      border-bottom: none;
+    }
+
+    .product-select-item.hidden {
+      display: none;
+    }
+
+    .product-select-item input[type="checkbox"] {
+      margin-right: 10px;
+    }
+
+    /* Style for selected items */
+    .product-select-item input[type="checkbox"]:checked + label {
+      color: var(--accent-primary);
+      font-weight: bold;
+    }
+
+    .product-select-item input[type="checkbox"]:checked {
+      accent-color: var(--accent-primary);
+    }
+
+    .product-select-item:has(input[type="checkbox"]:checked) {
+      background-color: var(--bg-elevated);
+      border-left: 3px solid var(--accent-primary);
+      padding-left: 7px; /* Compensate for the border */
+    }
+
+    .notification-input {
+      box-sizing: border-box;
+      width: 100%;
+      margin: 5px 0;
+      padding: 5px 12px;
+    }
+
+    /* Search Input Styles */
+    .search-container {
+      position: relative;
+      display: inline-block;
+    }
+
+    .search-input {
+      padding: 10px 35px 10px 10px;
+      border-radius: 5px;
+      border: 1px solid var(--accent-primary);
+      background-color: var(--bg-secondary);
+      color: var(--text-primary);
+      min-width: 200px;
+    }
+
+    .clear-search {
+      position: absolute;
+      right: 12px;
+      top: 50%;
+      transform: translateY(-50%);
+      background: none;
+      border: none;
+      color: var(--text-muted);
+      cursor: pointer;
+      padding: 0;
+      font-size: 18px;
+      line-height: 1;
+      display: none;
+      width: 16px;
+      height: 16px;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .clear-search:hover {
+      color: var(--text-primary);
+    }
+
+    /* Add new stock filter button styles */
+    .stock-filter-btn.active {
+      background-color: var(--bg-secondary);
+      color: var(--accent-primary) !important;
+      border-color: var(--accent-primary) !important;
+    }
+
+    .stock-filter-btn:not(.active) {
+      background-color: var(--bg-elevated);
+      color: var(--status-success) !important;
+      border-color: var(--status-success) !important;
+    }
+
+    .stock-filter-btn:hover {
+      background-color: var(--border-glow);
+    }
+
+    .header {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 2px;
+      margin-bottom: 20px;
+    }
+
+    .header img {
+      height: 40px;
+      width: auto;
+    }
+
+    .header h1 {
+      margin: 0;
+    }
+    .filters select {
+      -webkit-appearance: none;
+      -moz-appearance: none;
+      appearance: none;
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='none' stroke='%2360a5fa' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
+      background-repeat: no-repeat;
+      background-position: right 8px center;
+      background-size: 16px;
+      padding-right: 32px;
+      padding-left: 12px;
+    }
+
+    /* Add styles for the header links */
+    .header-link {
+      text-decoration: none;
+      color: inherit;
+      cursor: pointer;
+      transition: opacity 0.2s ease;
+    }
+
+    .header-link:hover {
+      opacity: 0.8;
+    }
+  </style>
+</head>
+<body>
+  <div class="header">
+    <!-- Add link around SVG -->
+    <a href="https://www.litfarms.com" class="header-link">
+      <svg width="75" height="75" viewBox="0 0 117.04084 64.042396" version="1.1" id="svg1" xml:space="preserve" xmlns="http://www.w3.org/2000/svg">
+        <defs id="defs1"></defs>
+        <g id="layer1" transform="translate(-46.479583,-116.4788)">
+          <rect style="display:inline;opacity:1;fill:none;fill-opacity:1;stroke:#ffffff;stroke-width:6;stroke-dasharray:none;stroke-opacity:1" id="rect2" width="111.04084" height="58.0424" x="49.47958" y="119.4788"></rect>
+          <g id="g6" style="opacity:1;fill:#ffffff;fill-opacity:1" transform="matrix(1,0,0,1.0224587,0.56861157,30.651474)">
+            <rect style="opacity:1;fill:#ffffff;fill-opacity:1;stroke:none;stroke-width:6.57396;stroke-dasharray:none;stroke-opacity:1" id="rect5" width="25.801872" height="5.860003" x="119.94384" y="98.674728" ry="0"></rect>
+            <rect style="opacity:1;fill:#ffffff;fill-opacity:1;stroke:none;stroke-width:6.03661;stroke-dasharray:none;stroke-opacity:1" id="rect6" width="6" height="30.334635" x="130.05539" y="101.46412"></rect>
+          </g>
+          <path style="opacity:1;fill:#ffffff;fill-opacity:1;stroke:none;stroke-width:5.81338;stroke-dasharray:none;stroke-opacity:1" d="m 100.03961,131.46649 h 6 v 33.97218 h -6 z" id="path4"></path>
+          <g id="g9" transform="matrix(1,0,0,1.0199169,-0.14807164,31.087934)">
+            <rect style="opacity:1;fill:#ffffff;fill-opacity:1;stroke:none;stroke-width:5.43999;stroke-dasharray:none;stroke-opacity:1" id="rect8" width="6" height="33.229393" x="64.364632" y="98.429321"></rect>
+            <rect style="opacity:1;fill:#ffffff;fill-opacity:1;stroke:none;stroke-width:5.84555;stroke-dasharray:none;stroke-opacity:1" id="rect9" width="21.184687" height="5.8828321" x="64.373192" y="125.75582"></rect>
+          </g>
+        </g>
+      </svg>
+    </a>
+    <!-- Add link around title -->
+    <a href="https://www.litfarms.com" class="header-link">
+      <h1>Farms Products</h1>
+    </a>
+  </div>
+  <div class="filters-container">
+    <div class="filters">
+      <div class="search-container">
+        <input type="text" id="product-search-filter" class="search-input" placeholder="Search products...">
+        <button id="clear-search" class="clear-search">&times;</button>
+      </div>
+      <select id="strain-filter">
+        <option value="all">All Tiers</option>
+        <option value="Essential">Essential</option>
+        <option value="Preferred">Preferred</option>
+        <option value="Supreme">Supreme</option>
+      </select>
+      <select id="strain-type-filter">
+        <option value="all">All Types</option>
+        <option value="sativa">Sativa</option>
+        <option value="indica">Indica</option>
+        <option value="hybrid">Hybrid</option>
+        <option value="unknown">Unknown</option>
+      </select>
+      <select id="weight-filter">
+        <option value="all">All Weights</option>
+        <option value="28g">28g</option>
+        <option value="3.5g">3.5g</option>
+      </select>
+      <select id="sort-filter">
+        <option value="alpha-asc">A-Z</option>
+        <option value="alpha-desc">Z-A</option>
+        <option value="price-asc">Price: Low to High</option>
+        <option value="price-desc">Price: High to Low</option>
+      </select>
+      <button id="stock-filter" class="stock-filter-btn active">Show All</button>
+    </div>
+    <div id="product-count" style="text-align: center; margin: 8px 0; color: #03dac6;">
+      Showing 0 products
+    </div>
+  </div>
+  <div class="product-grid" id="product-grid">
+    <!-- Product cards will be dynamically inserted here -->
+  </div>
+
+  <div id="loader" class="loader-container" style="display: none;">
+    <span class="loader"></span>
+    <div class="loader-text">Loading products...</div>
+  </div>
+
+  <script>
+    // Define the URL for the products.json endpoint
+    const shopifyStoreUrl = 'https://litfarms.com/products.json';
+    
+    // Ntfy configuration
+    const NTFY_CONFIG = {
+      appEnabled: false, // App notifications enabled
+      emailEnabled: false, // Email notifications enabled
+      topic: '', // Will be set in settings
+      server: 'https://ntfy.sh', // Default server, can be changed in settings
+      email: '' // Email for notifications
+    };
+
+    // Declare updateCheckerId at the top level
+    let updateCheckerId = null;
+
+    // Settings Management
+    const DEFAULT_SETTINGS = {
+      checkInterval: 5, // minutes
+      notificationTiers: ['all'],
+      notificationWeights: ['all'],
+      notifyNew: true,
+      notifyStock: true,
+      notifyRemoved: true,
+      specificProducts: [], // Array of product handles
+      ntfyAppEnabled: false,
+      ntfyEmailEnabled: false,
+      ntfyTopic: '',
+      ntfyServer: 'https://ntfy.sh',
+      ntfyEmail: ''
+    };
+
+    let currentSettings = { ...DEFAULT_SETTINGS };
+
+    function loadSettings() {
+      const savedSettings = localStorage.getItem('litFarmsNotificationSettings');
+      if (savedSettings) {
+        currentSettings = { ...DEFAULT_SETTINGS, ...JSON.parse(savedSettings) };
+      }
+      // Update Ntfy config
+      NTFY_CONFIG.appEnabled = currentSettings.ntfyAppEnabled;
+      NTFY_CONFIG.emailEnabled = currentSettings.ntfyEmailEnabled;
+      NTFY_CONFIG.topic = currentSettings.ntfyTopic;
+      NTFY_CONFIG.server = currentSettings.ntfyServer;
+      NTFY_CONFIG.email = currentSettings.ntfyEmail;
+      return currentSettings;
+    }
+
+    function saveSettings(settings) {
+      localStorage.setItem('litFarmsNotificationSettings', JSON.stringify(settings));
+      currentSettings = settings;
+      
+      // Update the update checker interval
+      if (updateCheckerId) {
+        clearInterval(updateCheckerId);
+      }
+      startProductUpdateChecker();
+    }
+
+    // Strain data
+    const MANUAL_STRAIN_DATA = {
+  "zereal": {
+    "description": "Zerealz is a slightly indica dominant hybrid strain (60% indica/40% sativa) created through crossing the powerful Zkittlez X Cereal Milk strains. Looking for an insanely delicious flavor and a super euphoric yet relaxing high? Zerealz is definitely made for you. This bud packs a sweet and creamy fruity berry flavor into each and every toke, sharpened slightly by a sour citrus exhale. The aroma is earthy and herbal at the onset before settling into a sweet and fruity effect as the nugs are broken apart and burned away.",
+    "category": "indica",
+    "phenotype": "indica",
+    "lastUpdate": 1738172569453
+  },
+  "white linen": {
+    "description": "White Linen is an indica dominant hybrid strain (70% indica/30% sativa) created through crossing the delicious Wedding Cake #13 X Melonade strains. Named for its gorgeous appearance and soft, soothing high, White Linen is the perfect choice for any lover of classic flavorful indicas. This bud has beautiful fat heart-shaped bright neon green nugs with minty green undertones, lots of thin yellow-orange hairs and a frosty thick coating of slightly golden-white crystal trichomes.",
+    "category": "indica",
+    "phenotype": "indica",
+    "lastUpdate": 1738172600552
+  },
+  "lit og": {
+    "description": "LIT OG: Where Tahoe OG meets Runtz in a legendary clash of titans. This unforgettable strain packs a powerful punch, leaving you feeling euphoric and blissful. But LIT OG isn't just about brute force. Its flavor profile is a delightful surprise, exploding with gassy OG terps that linger on the palate. It's the perfect choice for experienced users seeking a potent and flavorful experience that lives up to its name.",
+    "category": "sativa",
+    "phenotype": "sativa",
+    "lastUpdate": 1738172799107
+  },
+  "lemon cherry belts": {
+    "description": "Delivers a vibrant blend of sweet lemon zest and ripe cherries, with a smooth, creamy finish.",
+    "category": "hybrid",
+    "phenotype": "hybrid",
+    "lastUpdate": 1738179317058
+  },
+  "glitter bomb": {
+    "description": "Glitter Bomb THCa Flower will enchant you with its dazzling trichomes and hypnotic purple buds! It is a 70/30 indica dominant hybrid type 1 hemp flower that was indoor grown with living soil. This genetic gem of a strain is from crossing Grape Gas with OG Kush Breath Blueberry Headband, and exhibits notes of sweet, gas, and berries! This strain will have you dimension hopping with euphoria, transcendental thinking, and powerful relaxation!",
+    "category": "indica",
+    "phenotype": "indica",
+    "lastUpdate": 1738179386321
+  },
+  "apple banana zoap": {
+    "description": "Apple Banana Zoap from LIT Farms is a cannabis strain that combines the flavors of apples, bananas, and zoap. The strain''s unique flavor profile blends sweet, creamy notes of apples and bananas with earthy, floral undertones of zoap, creating a rich and aromatic experience. This combination makes Apple Banana highly appealing to cannabis users. This strain offers a balanced high, combining relaxation and a gentle cerebral stimulation, making it suitable for both recreational and medicinal use. The potent levels of THC in Apple Banana provide a strong and long-lasting effect, helping to relieve stress, anxiety, and chronic pain.",
+    "category": "indica",
+    "phenotype": "indica",
+    "lastUpdate": 1738179467896
+  }
+};
+
+    // Simplify loadStrainData to just use the constant
+    async function loadStrainData() {
+      try {
+        //console.log('Loading strain data...');
+        strainData = MANUAL_STRAIN_DATA;
+        console.log('Loaded strain data:', strainData);
+        return strainData;
+      } catch (error) {
+        console.error('Error in loadStrainData:', error);
+        return {};
+      }
+    }
+
+    // Update getStrainType to use the new strain data
+    function getStrainType(description, productHandle, productTitle) {
+      // First check strainData using the product title (cleaned)
+      const cleanTitle = productTitle
+        .replace(/\s*-?\s*THCA\s+Flower\s*$/i, '')
+        .replace(/\s*-?\s*Flower\s*$/i, '')
+        .replace(/\s*-?\s*\d+\.?\d*g\s*$/i, '')
+        .replace(/-/g, '')
+        .trim()
+        .toLowerCase();
+
+      // Try original cleaned title first
+      let strainInfo = strainData[cleanTitle];
+      
+      // If not found, try removing trailing 's' if present
+      if (!strainInfo && cleanTitle.endsWith('s')) {
+        const singularForm = cleanTitle.slice(0, -1);
+        strainInfo = strainData[singularForm];
+      }
+
+      if (strainInfo?.category) {
+        return strainInfo.category.toLowerCase();
+      }
+      
+      // Then check original description
+      if (!description) return 'unknown';
+      
+      const temp = document.createElement('div');
+      temp.innerHTML = description;
+      const plainText = temp.textContent.toLowerCase();
+      
+      if (plainText.includes('sativa')) return 'sativa';
+      if (plainText.includes('indica')) return 'indica';
+      if (plainText.includes('hybrid')) return 'hybrid';
+      return 'unknown';
+    }
+
+    // Function to show/hide loader
+    function toggleLoader(show) {
+      if (show) {
+        domElements.loader.style.display = 'flex';
+        domElements.productGrid.style.display = 'none';
+      } else {
+        domElements.loader.style.display = 'none';
+        domElements.productGrid.style.display = 'grid';
+      }
+    }
+
+    // Define global products variable
+    let products = [];
+
+    // Cache constants
+    const CACHE_KEY = 'litFarmsProducts';
+    const CACHE_TIMESTAMP_KEY = 'litFarmsLastUpdate';
+    const CACHE_DURATION = 5 * 60 * 1000; // 5 minutes in milliseconds
+
+    // Function to handle caching and fetching products
+    async function getProducts(immediate = false) {
+      const now = Date.now();
+      const lastUpdate = localStorage.getItem(CACHE_TIMESTAMP_KEY);
+      const cachedData = localStorage.getItem(CACHE_KEY);
+
+      try {
+        // Check for valid cached data
+        if (cachedData && lastUpdate) {
+          const parsedCache = JSON.parse(cachedData);
+          const isValidCache = Array.isArray(parsedCache) && 
+                              parsedCache.length > 0 && 
+                              parsedCache[0].hasOwnProperty('title');
+
+          if (isValidCache) {
+            // If this is an immediate request, return cached data regardless of age
+            if (immediate) {
+              return filterTHCAProducts(parsedCache);
+            }
+            
+            // For background updates, check if cache is fresh enough
+            if (now - parseInt(lastUpdate) < CACHE_DURATION) {
+              return filterTHCAProducts(parsedCache);
+            }
+          }
+        }
+
+        // If we get here, we need fresh data
+        console.log('Fetching fresh product data');
+        const freshProducts = await fetchAllProducts();
+        
+        if (!Array.isArray(freshProducts) || freshProducts.length === 0) {
+          throw new Error('Invalid or empty product data received');
+        }
+
+        const thcaProducts = filterTHCAProducts(freshProducts);
+        
+        if (thcaProducts.length > 0) {
+          localStorage.setItem(CACHE_KEY, JSON.stringify(thcaProducts));
+          localStorage.setItem(CACHE_TIMESTAMP_KEY, now.toString());
+        }
+        
+        return thcaProducts;
+      } catch (error) {
+        console.error('Error in getProducts:', error);
+        
+        // If this is an immediate request and we have any cached data, use it
+        if (immediate && cachedData) {
+          try {
+            const parsedCache = JSON.parse(cachedData);
+            if (Array.isArray(parsedCache) && parsedCache.length > 0) {
+              return filterTHCAProducts(parsedCache);
+            }
+          } catch (e) {
+            console.error('Failed to parse cached data:', e);
+          }
+        }
+        
+        // Clear potentially corrupted cache
+        localStorage.removeItem(CACHE_KEY);
+        localStorage.removeItem(CACHE_TIMESTAMP_KEY);
+        
+        // Try one more time without cache
+        try {
+          const freshProducts = await fetchAllProducts();
+          return filterTHCAProducts(freshProducts);
+        } catch (retryError) {
+          console.error('Retry failed:', retryError);
+          throw new Error('Failed to load products after retry');
+        }
+      }
+    }
+
+    // Update the fetchAllProducts function to include logging
+    async function fetchAllProducts() {
+      let allProducts = [];
+      
+      try {
+        // Fetch first page
+        const response = await fetch(`${shopifyStoreUrl}?page=1&limit=250`);
+        const data = await response.json();
+        
+        if (data.products && data.products.length > 0) {
+          allProducts = data.products;
+          console.log(`Found ${data.products.length} products on page 1`);
+          
+          // Only continue fetching if we got the maximum number of products (250)
+          if (data.products.length === 250) {
+            let page = 2;
+            let hasMore = true;
+            
+            while (hasMore) {
+              try {
+                const nextResponse = await fetch(`${shopifyStoreUrl}?page=${page}&limit=250`);
+                const nextData = await nextResponse.json();
+                
+                if (nextData.products && nextData.products.length > 0) {
+                  console.log(`Found ${nextData.products.length} products on page ${page}`);
+                  allProducts = allProducts.concat(nextData.products);
+                  page++;
+                  
+                  // If we got less than 250 products, we've reached the end
+                  if (nextData.products.length < 250) {
+                    hasMore = false;
+                  }
+                } else {
+                  hasMore = false;
+                }
+              } catch (error) {
+                console.error('Error fetching page', page, ':', error);
+                hasMore = false;
+              }
+            }
+          }
+        }
+      } catch (error) {
+        console.error('Error fetching first page:', error);
+      }
+
+      console.log('Total products fetched:', allProducts.length);
+      return allProducts;
+    }
+
+    function renderProducts(filteredProducts) {
+      const productGrid = domElements.productGrid;
+      domElements.productCount.textContent = `Showing ${filteredProducts.length} products`;
+
+      // First, mark existing cards for fade out
+      const existingCards = productGrid.querySelectorAll('.product-card');
+      existingCards.forEach(card => card.classList.add('fade-out'));
+
+      // Wait for fade out animation
+      setTimeout(() => {
+        // Clear the grid but maintain the few-items class if it should stay
+        const shouldHaveFewItems = filteredProducts.length < 4;
+        const hadFewItems = productGrid.classList.contains('few-items');
+        
+        // Only remove the few-items class if we're transitioning from few to many
+        if (hadFewItems && !shouldHaveFewItems) {
+          productGrid.classList.remove('few-items');
+        }
+        
+        productGrid.innerHTML = '';
+
+        
+        if (!hadFewItems && shouldHaveFewItems) {
+          productGrid.classList.add('few-items');
+        }
+
+        // Calculate initial load count
+        const productWidth = 250;
+        const gap = 20;
+        const containerWidth = productGrid.offsetWidth;
+        const productsPerRow = Math.floor(containerWidth / (productWidth + gap));
+        const initialLoadCount = productsPerRow * 2;
+
+        // Function to render a batch of products with staggered animation
+        const renderBatch = (products, startIndex, endIndex) => {
+          products.slice(startIndex, endIndex).forEach((product, index) => {
+            const productCard = document.createElement('div');
+            productCard.className = 'product-card';
+            productCard.style.animationDelay = `${index * 50}ms`; // Stagger the animations
+            
+            productCard.addEventListener('click', () => {
+              window.open(`https://litfarms.com/products/${product.handle}`, '_blank');
+            });
+
+            // Strain type badge
+            const strainType = getStrainType(product.body_html, product.handle, product.title);
+            const strainTypeBadge = createStrainTypeBadge(strainType);
+            productCard.appendChild(strainTypeBadge);
+            productCard.style.position = 'relative';
+
+            const processedVariants = utils.processVariants(product);
+            let relevantVariants = processedVariants;
+            
+            if (domElements.strainFilter.value !== 'all') {
+              relevantVariants = relevantVariants.filter(v => v.correctedTier === domElements.strainFilter.value);
+            }
+            if (domElements.weightFilter.value !== 'all') {
+              relevantVariants = relevantVariants.filter(v => v.correctedWeight === domElements.weightFilter.value);
+            }
+
+            if (!domElements.stockFilter.classList.contains('active')) {
+              const hasInStockVariant = relevantVariants.some(variant => variant.available);
+              if (!hasInStockVariant) {
+                productCard.style.opacity = '0.7';
+              }
+            }
+
+            // Create and add product image
+            const image = document.createElement('img');
+            image.className = 'product-image';
+            image.alt = product.title;
+            image.src = product.images[0]?.src || 'https://via.placeholder.com/300';
+            productCard.appendChild(image);
+
+            const productTitle = createProductTitle(product);
+            productCard.appendChild(productTitle);
+
+            const priceContainer = createPriceContainer(product, relevantVariants, domElements.strainFilter.value, domElements.weightFilter.value, domElements.stockFilter.classList.contains('active'));
+            productCard.appendChild(priceContainer);
+
+            const productDescription = createProductDescription(product);
+            productCard.appendChild(productDescription);
+
+            productGrid.appendChild(productCard);
+          });
+        };
+
+        // Render first two rows immediately
+        renderBatch(filteredProducts, 0, initialLoadCount);
+
+        // Render the rest after a short delay
+        if (filteredProducts.length > initialLoadCount) {
+          setTimeout(() => {
+            renderBatch(filteredProducts, initialLoadCount, filteredProducts.length);
+          }, 300); // Wait for initial batch animations to complete
+        }
+      }, 200); // Match this with the fade-out transition duration
+    }
+
+    // Helper functions for rendering
+    function createStrainTypeBadge(strainType) {
+      const badge = document.createElement('div');
+      badge.style.position = 'absolute';
+      badge.style.top = '10px';
+      badge.style.right = '10px';
+      badge.style.padding = '5px 10px';
+      badge.style.borderRadius = '15px';
+      badge.style.textTransform = 'capitalize';
+      
+      // Set badge color based on strain type
+      switch(strainType) {
+        case 'sativa':
+          badge.style.backgroundColor = 'var(--strain-sativa)';
+          badge.style.color = '#000';
+          break;
+        case 'indica':
+          badge.style.backgroundColor = 'var(--strain-indica)';
+          badge.style.color = '#fff';
+          break;
+        case 'hybrid':
+          badge.style.backgroundColor = 'var(--strain-hybrid)';
+          badge.style.color = '#fff';
+          break;
+        default:
+          badge.style.backgroundColor = 'var(--strain-unknown)';
+          badge.style.color = '#fff';
+      }
+      
+      badge.textContent = strainType;
+      return badge;
+    }
+
+    function createProductImage(product) {
+      const image = document.createElement('img');
+      image.src = product.images[0]?.src || 'https://via.placeholder.com/300';
+      image.alt = product.title;
+      image.className = 'product-image';
+      return image;
+    }
+
+    function createProductTitle(product) {
+      const title = document.createElement('h2');
+      title.className = 'product-title';
+      title.textContent = product.title;
+      return title;
+    }
+
+    function createPriceContainer(product, variants, strainFilter, weightFilter, stockFilter) {
+      const container = document.createElement('div');
+      container.className = 'price-container';
+
+      // Group variants by tier
+      const variantsByTier = {};
+      TIERS.forEach(tier => {
+        variantsByTier[tier] = [];
+      });
+
+      variants.forEach(variant => {
+        if (variant.correctedTier && variant.correctedWeight) {
+          variantsByTier[variant.correctedTier].push(variant);
+        }
+      });
+
+      // Create sections for each tier
+      TIERS.forEach(tier => {
+        if (strainFilter !== 'all' && tier !== strainFilter) {
+          return;
+        }
+
+        const tierVariants = variantsByTier[tier];
+        if (tierVariants && tierVariants.length > 0) {
+          const filteredVariants = tierVariants.filter(variant => {
+            if (weightFilter !== 'all' && variant.correctedWeight !== weightFilter) {
+              return false;
+            }
+            if (!stockFilter && !variant.available) {
+              return false;
+            }
+            return true;
+          });
+
+          if (filteredVariants.length > 0) {
+            container.appendChild(createTierSection(tier, filteredVariants));
+          }
+        }
+      });
+
+      return container;
+    }
+
+    function createTierSection(tier, variants) {
+      const section = document.createElement('div');
+      section.className = 'variant-section';
+
+      const title = document.createElement('div');
+      title.className = 'variant-title';
+      title.textContent = tier;
+      section.appendChild(title);
+
+      const weights = document.createElement('div');
+      weights.className = 'variant-weights';
+
+      // Create a map of weights to variants
+      const weightMap = new Map(variants.map(v => [v.correctedWeight, v]));
+
+      // Convert to array and sort by price (highest first)
+      const sortedWeights = Array.from(weightMap.entries())
+        .sort((a, b) => parseFloat(b[1].price) - parseFloat(a[1].price));
+
+      sortedWeights.forEach(([weight, variant]) => {
+        weights.appendChild(createWeightRow(variant));
+      });
+
+      section.appendChild(weights);
+      return section;
+    }
+
+    function createWeightRow(variant) {
+      const row = document.createElement('div');
+      row.className = 'weight-row';
+
+      const info = document.createElement('div');
+      info.className = 'weight-info';
+
+      const label = document.createElement('span');
+      label.className = 'weight-label';
+      label.textContent = variant.correctedWeight;
+
+      const price = document.createElement('span');
+      price.className = 'weight-price';
+      price.textContent = `$${variant.price}`;
+
+      info.appendChild(label);
+      info.appendChild(price);
+
+      const stockBadge = document.createElement('span');
+      stockBadge.className = `stock-badge ${variant.available ? 'in-stock-badge' : 'out-of-stock-badge'}`;
+      stockBadge.textContent = variant.available ? 'In Stock' : 'Out of Stock';
+
+      row.appendChild(info);
+      row.appendChild(stockBadge);
+      return row;
+    }
+
+    function createProductDescription(product) {
+      const description = document.createElement('p');
+      description.className = 'product-description';
+      
+      const cleanStrainName = product.title
+        .replace(/\s*-?\s*THCA\s+Flower\s*$/i, '')
+        .replace(/\s*-?\s*Flower\s*$/i, '')
+        .replace(/\s*-?\s*\d+\.?\d*g\s*$/i, '')
+        .replace(/-/g, '')
+        .trim()
+        .toLowerCase();
+
+      const leaflyData = strainData[cleanStrainName];
+      description.innerHTML = leaflyData?.description || product.body_html || 'No description available.';
+      return description;
+    }
+
+    // Update filter function
+    function filterProducts() {
+      const strainFilter = domElements.strainFilter.value;
+      const strainTypeFilter = domElements.strainTypeFilter.value;
+      const weightFilter = domElements.weightFilter.value;
+      const stockFilter = domElements.stockFilter.classList.contains('active');
+      const searchQuery = domElements.searchInput.value.toLowerCase().trim();
+      const sortFilter = domElements.sortFilter.value;
+
+      const filteredProducts = products.filter((product) => {
+        // Check search query first
+        if (searchQuery && !product.title.toLowerCase().includes(searchQuery)) {
+          return false;
+        }
+
+        // Process variants with utility function
+        const correctedVariants = utils.processVariants(product);
+
+        // If no valid variants at all, filter out the product
+        if (correctedVariants.length === 0) {
+          return false;
+        }
+
+        // Check if any variant matches the weight filter AND has a valid price
+        if (weightFilter !== 'all') {
+          const validWeightVariants = correctedVariants.filter(v => 
+            v.correctedWeight === weightFilter && 
+            v.hasPrice
+          );
+          if (validWeightVariants.length === 0) {
+            return false;
+          }
+        }
+
+        // Check if any variant matches the strain filter
+        if (strainFilter !== 'all') {
+          const validStrainVariants = correctedVariants.filter(v => 
+            v.correctedTier === strainFilter && 
+            (weightFilter === 'all' || v.correctedWeight === weightFilter) &&
+            v.hasPrice
+          );
+          if (validStrainVariants.length === 0) {
+            return false;
+          }
+        }
+
+        // Check strain type
+        if (strainTypeFilter !== 'all') {
+          const productStrainType = getStrainType(product.body_html, product.handle, product.title);
+          if (productStrainType !== strainTypeFilter) {
+            return false;
+          }
+        }
+
+        // Check stock status
+        if (!stockFilter) {
+          let stockCheckVariants = correctedVariants;
+          if (weightFilter !== 'all') {
+            stockCheckVariants = stockCheckVariants.filter(v => 
+              v.correctedWeight === weightFilter && 
+              v.hasPrice
+            );
+          }
+          if (strainFilter !== 'all') {
+            stockCheckVariants = stockCheckVariants.filter(v => v.correctedTier === strainFilter);
+          }
+          
+          const hasInStockVariant = stockCheckVariants.some(variant => variant.available);
+          if (!hasInStockVariant) {
+            return false;
+          }
+        }
+
+        return true;
+      });
+
+      // Sort the filtered products
+      const sortedProducts = utils.sortProducts(filteredProducts, sortFilter, strainFilter, weightFilter);
+      
+      // Render the sorted products
+      renderProducts(sortedProducts);
+    }
+
+    // Functions to handle filter state persistence
+    function saveFilterState() {
+      const filterState = {
+        strainFilter: document.getElementById('strain-filter').value,
+        strainTypeFilter: document.getElementById('strain-type-filter').value,
+        weightFilter: document.getElementById('weight-filter').value,
+        sortFilter: document.getElementById('sort-filter').value,
+        stockFilter: document.getElementById('stock-filter').classList.contains('active')
+      };
+      localStorage.setItem('litFarmsFilterState', JSON.stringify(filterState));
+    }
+
+    function loadFilterState() {
+      const savedState = localStorage.getItem('litFarmsFilterState');
+      if (savedState) {
+        const filterState = JSON.parse(savedState);
+        
+        // Restore select filters and update their styles
+        const selects = {
+          'strain-filter': filterState.strainFilter,
+          'strain-type-filter': filterState.strainTypeFilter,
+          'weight-filter': filterState.weightFilter,
+          'sort-filter': filterState.sortFilter
+        };
+
+        Object.entries(selects).forEach(([id, value]) => {
+          const select = document.getElementById(id);
+          select.value = value;
+          updateSelectStyle(select);
+        });
+        
+        // Restore stock filter button state
+        const stockButton = document.getElementById('stock-filter');
+        if (filterState.stockFilter) {
+          stockButton.classList.add('active');
+          stockButton.textContent = 'Show All Items';
+        } else {
+          stockButton.classList.remove('active');
+          stockButton.textContent = 'In Stock Only';
+        }
+      } else {
+        // Set default state for first-time users: In Stock Only
+        const stockButton = document.getElementById('stock-filter');
+        stockButton.classList.remove('active');
+        stockButton.textContent = 'In Stock Only';
+      }
+
+      // Always reset search input
+      const searchInput = document.getElementById('product-search-filter');
+      const clearSearchButton = document.getElementById('clear-search');
+      searchInput.value = '';
+      clearSearchButton.style.display = 'none';
+    }
+
+    // Event listeners for filters
+    document.getElementById('strain-filter').addEventListener('change', (e) => {
+      updateSelectStyle(e.target);
+      filterProducts();
+      saveFilterState();
+    });
+
+    document.getElementById('strain-type-filter').addEventListener('change', (e) => {
+      updateSelectStyle(e.target);
+      filterProducts();
+      saveFilterState();
+    });
+
+    document.getElementById('weight-filter').addEventListener('change', (e) => {
+      updateSelectStyle(e.target);
+      filterProducts();
+      saveFilterState();
+    });
+
+    document.getElementById('sort-filter').addEventListener('change', (e) => {
+      updateSelectStyle(e.target);
+      filterProducts();
+      saveFilterState();
+    });
+
+    // Function to update select element style based on selection
+    function updateSelectStyle(selectElement) {
+      // Don't apply styles to the sort filter since it has no default option
+      if (selectElement.id === 'sort-filter') {
+        return;
+      }
+      
+      if (selectElement.value === 'all') {
+        selectElement.classList.remove('has-selection');
+      } else {
+        selectElement.classList.add('has-selection');
+      }
+    }
+
+    document.getElementById('stock-filter').addEventListener('click', () => {
+      const button = document.getElementById('stock-filter');
+      button.classList.toggle('active');
+      button.textContent = button.classList.contains('active') ? 'Show All Items' : 'In Stock Only';
+      filterProducts();
+      saveFilterState();
+    });
+
+    // Function to compare products and detect changes
+    function detectProductChanges(oldProducts, newProducts) {
+      log(LOG_LEVELS.INFO, '=== Starting Product Change Detection ===');
+      log(LOG_LEVELS.INFO, `Old products count: ${oldProducts.length}`);
+      log(LOG_LEVELS.INFO, `New products count: ${newProducts.length}`);
+
+      // Helper function to check if a product matches current filters
+      function matchesFilters(product) {
+        const variants = utils.processVariants(product);
+        
+        // If specific products are selected, only check those
+        if (currentSettings.specificProducts.length > 0) {
+          return currentSettings.specificProducts.includes(product.handle);
+        }
+
+        // Check if any variant matches the tier and weight filters
+        return variants.some(variant => {
+          const matchesTier = currentSettings.notificationTiers.includes('all') ||
+                            currentSettings.notificationTiers.includes(variant.correctedTier);
+          const matchesWeight = currentSettings.notificationWeights.includes('all') ||
+                              currentSettings.notificationWeights.includes(variant.correctedWeight);
+          return matchesTier && matchesWeight;
+        });
+      }
+
+      const changes = {
+        new: [],
+        stockChanged: [],
+        removed: []
+      };
+
+      // Check for new products
+      if (currentSettings.notifyNew) {
+        const oldHandles = new Set(oldProducts.map(p => p.handle));
+        const newlyAdded = newProducts.filter(p => !oldHandles.has(p.handle));
+        
+        newlyAdded.forEach(newProduct => {
+          if (matchesFilters(newProduct)) {
+            log(LOG_LEVELS.INFO, `New product detected: ${newProduct.title}`);
+            changes.new.push(newProduct);
+          }
+        });
+      }
+
+      // Check for stock changes and variant changes
+      if (currentSettings.notifyStock) {
+        newProducts.forEach(newProduct => {
+          const oldProduct = oldProducts.find(p => p.handle === newProduct.handle);
+          if (oldProduct && matchesFilters(newProduct)) {
+            const oldVariants = utils.processVariants(oldProduct);
+            const newVariants = utils.processVariants(newProduct);
+
+            let hasChanges = false;
+            const changedVariants = [];
+
+            // Check for changes in existing variants
+            newVariants.forEach(newVariant => {
+              const oldVariant = oldVariants.find(v => 
+                v.correctedTier === newVariant.correctedTier && 
+                v.correctedWeight === newVariant.correctedWeight
+              );
+
+              if (oldVariant) {
+                if (oldVariant.available !== newVariant.available ||
+                    oldVariant.price !== newVariant.price) {
+                  hasChanges = true;
+                  changedVariants.push({
+                    ...newVariant,
+                    oldPrice: oldVariant.price,
+                    oldAvailable: oldVariant.available
+                  });
+                  log(LOG_LEVELS.INFO, `Variant change detected for ${newProduct.title}`, {
+                    tier: newVariant.correctedTier,
+                    weight: newVariant.correctedWeight,
+                    oldPrice: oldVariant.price,
+                    newPrice: newVariant.price,
+                    oldAvailable: oldVariant.available,
+                    newAvailable: newVariant.available
+                  });
+                }
+              } else {
+                // New variant added
+                hasChanges = true;
+                changedVariants.push(newVariant);
+                log(LOG_LEVELS.INFO, `New variant added to ${newProduct.title}`, {
+                  tier: newVariant.correctedTier,
+                  weight: newVariant.correctedWeight,
+                  price: newVariant.price,
+                  available: newVariant.available
+                });
+              }
+            });
+
+            if (hasChanges) {
+              changes.stockChanged.push({
+                ...newProduct,
+                changedVariants
+              });
+            }
+          }
+        });
+      }
+
+      // Check for removed products
+      if (currentSettings.notifyRemoved) {
+        const newHandles = new Set(newProducts.map(p => p.handle));
+        oldProducts.forEach(oldProduct => {
+          if (!newHandles.has(oldProduct.handle) && matchesFilters(oldProduct)) {
+            log(LOG_LEVELS.INFO, `Product removed: ${oldProduct.title}`);
+            changes.removed.push(oldProduct);
+          }
+        });
+      }
+
+      // Log summary of changes
+      log(LOG_LEVELS.INFO, '=== Change Detection Summary ===', {
+        newProducts: changes.new.length,
+        stockChanges: changes.stockChanged.length,
+        removedProducts: changes.removed.length
+      });
+
+      return changes;
+    }
+
+    // Function to send Ntfy notification
+    async function sendNtfyNotification(title, message, priority = 3) {
+      if (!NTFY_CONFIG.appEnabled && !NTFY_CONFIG.emailEnabled) {
+        console.log('No notification methods enabled');
+        return;
+      }
+
+      if (NTFY_CONFIG.appEnabled && !NTFY_CONFIG.topic) {
+        console.log('App notifications enabled but no topic set');
+        return;
+      }
+
+      if (NTFY_CONFIG.emailEnabled && !NTFY_CONFIG.email) {
+        console.log('Email notifications enabled but no email set');
+        return;
+      }
+
+      try {
+        const headers = {
+          'X-Title': title,
+          'X-Priority': priority.toString(),
+          'X-Tags': 'cannabis,stock'
+        };
+
+        // Email header
+        if (NTFY_CONFIG.emailEnabled && NTFY_CONFIG.email) {
+          headers['X-Email'] = NTFY_CONFIG.email;
+        }
+
+        // Send notification - we need a topic even for email-only notifications
+        const topic = NTFY_CONFIG.appEnabled ? NTFY_CONFIG.topic : 'email-only-' + Math.random().toString(36).substring(7);
+        
+        const response = await fetch(`${NTFY_CONFIG.server}/${topic}`, {
+          method: 'POST',
+          headers: headers,
+          body: message
+        });
+
+        if (!response.ok) {
+          throw new Error(`HTTP error! status: ${response.status}`);
+        }
+        console.log('Notification sent successfully');
+      } catch (error) {
+        console.error('Failed to send notification:', error);
+      }
+    }
+
+    // Function to check if a variant matches notification settings
+    function matchesNotificationFilters(variant) {
+      const matchesTier = currentSettings.notificationTiers.includes('all') ||
+                         currentSettings.notificationTiers.includes(variant.correctedTier);
+      const matchesWeight = currentSettings.notificationWeights.includes('all') ||
+                         currentSettings.notificationWeights.includes(variant.correctedWeight);
+      return matchesTier && matchesWeight;
+    }
+
+    // Update handleNotifications function to filter based on settings
+    async function handleNotifications(changes) {
+      if (!changes.new.length && !changes.stockChanged.length && !changes.removed.length) {
+        return;
+      }
+
+      // Filter changes based on notification settings
+      const filteredChanges = {
+        new: changes.new.filter(product => {
+          const variants = utils.processVariants(product);
+          return variants.some(variant => matchesNotificationFilters(variant));
+        }),
+        stockChanged: changes.stockChanged.filter(product => {
+          // Only include products where changed variants match filters
+          const filteredVariants = product.changedVariants.filter(variant => 
+            matchesNotificationFilters(variant)
+          );
+          if (filteredVariants.length > 0) {
+            // Update changedVariants to only include matching variants
+            product.changedVariants = filteredVariants;
+            return true;
+          }
+          return false;
+        }),
+        removed: changes.removed.filter(product => {
+          const variants = utils.processVariants(product);
+          return variants.some(variant => matchesNotificationFilters(variant));
+        })
+      };
+
+      // Log all changes for record keeping
+      log(LOG_LEVELS.INFO, '=== All Changes ===', changes);
+      log(LOG_LEVELS.INFO, '=== Filtered Changes for Notifications ===', filteredChanges);
+
+      // Only send notification if there are filtered changes and notifications are enabled
+      if ((filteredChanges.new.length || filteredChanges.stockChanged.length || filteredChanges.removed.length) &&
+          (NTFY_CONFIG.appEnabled || NTFY_CONFIG.emailEnabled)) {
+        
+        let ntfyMessage = '';
+        
+        if (filteredChanges.new.length && currentSettings.notifyNew) {
+          ntfyMessage += `🌟 NEW PRODUCTS (${filteredChanges.new.length}) 🌟\n\n`;
+          filteredChanges.new.forEach(p => {
+            const matchingVariants = utils.processVariants(p).filter(v => matchesNotificationFilters(v));
+            ntfyMessage += `🌿 ${p.title}\n`;
+            matchingVariants.forEach(v => {
+              ntfyMessage += `   • ${v.correctedTier} ${v.correctedWeight}\n`;
+              ntfyMessage += `     💰 $${v.price} ${v.available ? '(In Stock)' : '(Out of Stock)'}\n`;
+            });
+            ntfyMessage += '\n';
+          });
+        }
+        
+        if (filteredChanges.stockChanged.length && currentSettings.notifyStock) {
+          ntfyMessage += `📦 STOCK CHANGES (${filteredChanges.stockChanged.length}) 📦\n\n`;
+          filteredChanges.stockChanged.forEach(p => {
+            ntfyMessage += `🌿 ${p.title}\n\n`;
+            
+            // Get new variants (variants without oldPrice or oldAvailable)
+            const newVariants = p.changedVariants.filter(v => !v.oldPrice && !v.oldAvailable);
+            const nowInStock = p.changedVariants.filter(v => v.oldAvailable === false && v.available === true);
+            const nowOutOfStock = p.changedVariants.filter(v => v.oldAvailable === true && v.available === false);
+            const priceChanges = p.changedVariants.filter(v => v.oldPrice && v.price !== v.oldPrice);
+            
+            // New variants added
+            if (newVariants.length > 0) {
+              ntfyMessage += `   🆕 NEW VARIANTS ADDED:\n`;
+              newVariants.forEach(v => {
+                ntfyMessage += `      • ${v.correctedTier} ${v.correctedWeight}\n`;
+                if (v.available) {
+                  ntfyMessage += `        💰 $${v.price} (In Stock)\n`;
+                } else {
+                  ntfyMessage += `        💰 $${v.price} (Out of Stock)\n`;
+                }
+              });
+              ntfyMessage += '\n';
+            }
+            
+            if (nowInStock.length > 0) {
+              ntfyMessage += `   ✅ NOW IN STOCK:\n`;
+              nowInStock.forEach(v => {
+                ntfyMessage += `      • ${v.correctedTier} ${v.correctedWeight}\n        💰 $${v.price}\n`;
+              });
+              ntfyMessage += '\n';
+            }
+            
+            if (nowOutOfStock.length > 0) {
+              ntfyMessage += `   ❌ NOW OUT OF STOCK:\n`;
+              nowOutOfStock.forEach(v => {
+                ntfyMessage += `      • ${v.correctedTier} ${v.correctedWeight}\n        💰 $${v.price}\n`;
+              });
+              ntfyMessage += '\n';
+            }
+
+            if (priceChanges.length > 0) {
+              ntfyMessage += `   💰 PRICE CHANGES:\n`;
+              priceChanges.forEach(v => {
+                const priceChange = parseFloat(v.oldPrice) - parseFloat(v.price);
+                const changeSymbol = priceChange > 0 ? '↓' : '↑';
+                ntfyMessage += `      • ${v.correctedTier} ${v.correctedWeight}\n`;
+                ntfyMessage += `        Was: $${v.oldPrice} → Now: $${v.price} ${changeSymbol}\n`;
+                ntfyMessage += `        ${Math.abs(priceChange).toFixed(2)} ${priceChange > 0 ? 'decrease' : 'increase'}\n`;
+              });
+              ntfyMessage += '\n';
+            }
+          });
+        }
+        
+        if (filteredChanges.removed.length && currentSettings.notifyRemoved) {
+          ntfyMessage += `🚫 REMOVED PRODUCTS (${filteredChanges.removed.length}) 🚫\n\n`;
+          filteredChanges.removed.forEach(p => {
+            const matchingVariants = utils.processVariants(p).filter(v => matchesNotificationFilters(v));
+            ntfyMessage += `❌ ${p.title}\n`;
+            matchingVariants.forEach(v => {
+              ntfyMessage += `   • ${v.correctedTier} ${v.correctedWeight}\n`;
+            });
+            ntfyMessage += '\n';
+          });
+        }
+        
+        if (ntfyMessage) {
+          ntfyMessage += `\n🕒 Updated: ${new Date().toLocaleString()}`;
+          await sendNtfyNotification('LitFarms Update', ntfyMessage);
+        }
+      }
+    }
+
+    // Update the startProductUpdateChecker function
+    function startProductUpdateChecker() {
+      let lastProducts = products;
+      const intervalMs = currentSettings.checkInterval * 60 * 1000; // Convert minutes to milliseconds
+
+      console.log(`Starting product update checker - checking every ${currentSettings.checkInterval} minutes`);
+
+      updateCheckerId = setInterval(async () => {
+        try {
+          //console.log('Checking for product updates...');
+          const freshProducts = await getProducts();
+          
+          // Always perform change detection
+          const changes = detectProductChanges(lastProducts, freshProducts);
+          
+          // Only update state and send notifications if there are actual changes
+          if (changes.new.length > 0 || changes.stockChanged.length > 0 || changes.removed.length > 0) {
+            console.log('Changes detected, updating state and sending notifications...');
+            await handleNotifications(changes);
+            products = freshProducts;
+            lastProducts = freshProducts;
+            filterProducts();
+            updateProductSelectList();
+          }
+          
+        } catch (error) {
+          console.error('Error checking for product updates:', error);
+        }
+      }, intervalMs);
+
+      return updateCheckerId;
+    }
+
+    // Filter THCA products
+    function filterTHCAProducts(products) {
+      const thcaProducts = products.filter(product => 
+        product.title.toLowerCase().includes('thca') || 
+        product.tags.includes('thca') || 
+        product.product_type === 'THCA Flower'
+      );
+      //console.log(`Filtered ${products.length} total products to ${thcaProducts.length} THCA products`);
+      return thcaProducts;
+    }
+
+    // Update the preloadImages function to remove text updates
+    function preloadImages(products) {
+      return Promise.all(products.map(product => {
+        if (!product.images[0]?.src) return Promise.resolve();
+        return new Promise((resolve) => {
+          const img = new Image();
+          img.onload = () => resolve();
+          img.onerror = () => resolve();
+          img.src = product.images[0].src;
+        });
+      }));
+    }
+
+    // Update the attemptLoad function
+    async function attemptLoad() {
+      try {
+        // Load notification settings first
+        loadSettings();
+        
+        // First try to load cached products immediately
+        products = await getProducts(true);
+        
+        if (Array.isArray(products) && products.length > 0) {
+          // We have cached products, show them immediately
+          console.log(`Loaded ${products.length} cached THCA products`);
+          loadFilterState();
+          await loadStrainData();
+          
+          // Show products immediately
+          toggleLoader(false);
+          filterProducts();
+          
+          // Then check for updates in the background
+          const updatedProducts = await getProducts(false);
+          if (JSON.stringify(products) !== JSON.stringify(updatedProducts)) {
+            console.log('Products updated, refreshing display');
+            products = updatedProducts;
+            filterProducts();
+          }
+        } else {
+          // No cached products, load fresh
+          products = await getProducts(false);
+          if (!Array.isArray(products) || products.length === 0) {
+            throw new Error('No products loaded');
+          }
+          
+          console.log(`Loaded ${products.length} fresh THCA products`);
+          loadFilterState();
+          await loadStrainData();
+          
+          // Preload images before showing fresh products
+          const filteredProducts = products.filter(() => true);
+          await Promise.race([
+            preloadImages(filteredProducts),
+            new Promise(resolve => setTimeout(resolve, 5000))
+          ]);
+          
+          toggleLoader(false);
+          filterProducts();
+        }
+
+        // Start the update checker
+        startProductUpdateChecker();
+        
+      } catch (error) {
+        console.error('Error in initialization:', error);
+        
+        if (retryCount < maxRetries) {
+          retryCount++;
+          console.log(`Retrying... Attempt ${retryCount} of ${maxRetries}`);
+          
+          // Clear cache before retrying
+          localStorage.removeItem(CACHE_KEY);
+          localStorage.removeItem(CACHE_TIMESTAMP_KEY);
+          
+          // Wait a bit before retrying
+          await new Promise(resolve => setTimeout(resolve, 1000));
+          return attemptLoad();
+        }
+        
+        const productGrid = document.getElementById('product-grid');
+        productGrid.innerHTML = `
+          <div style="text-align: center; padding: 20px;">
+            <p style="color: var(--status-error); margin-bottom: 15px;">
+              Error loading products. Please try refreshing the page.
+            </p>
+            <button onclick="window.location.reload()" style="
+              background-color: var(--accent-primary);
+              color: var(--bg-primary);
+              border: none;
+              padding: 10px 20px;
+              border-radius: 5px;
+              cursor: pointer;
+            ">
+              Refresh Page
+            </button>
+          </div>`;
+        toggleLoader(false);
+      }
+    }
+
+    // Document ready event listener
+    document.addEventListener('DOMContentLoaded', async () => {
+      toggleLoader(true);
+
+      // Settings modal
+      document.getElementById('settings-button').addEventListener('click', openSettingsModal);
+      document.querySelector('.close-modal').addEventListener('click', closeSettingsModal);
+      document.querySelector('.save-settings').addEventListener('click', saveSettingsFromForm);
+
+      // Track mousedown position for modal
+      let modalMouseDown = false;
+      const modal = document.getElementById('settings-modal');
+      
+      modal.addEventListener('mousedown', (e) => {
+        if (e.target === modal) {
+          modalMouseDown = true;
+        }
+      });
+
+      modal.addEventListener('mouseup', (e) => {
+        if (e.target === modal && modalMouseDown) {
+          closeSettingsModal();
+        }
+        modalMouseDown = false;
+      });
+
+      // Reset flag when mouse leaves modal
+      modal.addEventListener('mouseleave', () => {
+        modalMouseDown = false;
+      });
+
+      let retryCount = 0;
+      const maxRetries = 3;
+
+      await attemptLoad();
+    });
+
+    function updateProductSelectList() {
+      const productSelect = document.getElementById('product-select');
+      productSelect.innerHTML = '';
+
+      // Sort products alphabetically by title
+      const sortedProducts = [...products].sort((a, b) => 
+        a.title.toLowerCase().localeCompare(b.title.toLowerCase())
+      );
+
+      sortedProducts.forEach(product => {
+        const item = document.createElement('div');
+        item.className = 'product-select-item';
+        
+        const checkbox = document.createElement('input');
+        checkbox.type = 'checkbox';
+        checkbox.id = `product-${product.handle}`;
+        checkbox.value = product.handle;
+        checkbox.checked = currentSettings.specificProducts.includes(product.handle);
+        
+        const label = document.createElement('label');
+        label.htmlFor = `product-${product.handle}`;
+        label.textContent = product.title;
+        
+        item.appendChild(checkbox);
+        item.appendChild(label);
+        productSelect.appendChild(item);
+      });
+
+      // Search functionality
+      const searchInput = document.getElementById('product-search');
+      
+      function filterProducts(searchTerm) {
+        const items = productSelect.getElementsByClassName('product-select-item');
+        const term = searchTerm.toLowerCase();
+        
+        Array.from(items).forEach(item => {
+          const label = item.querySelector('label');
+          const title = label.textContent.toLowerCase();
+          
+          if (title.includes(term)) {
+            item.classList.remove('hidden');
+          } else {
+            item.classList.add('hidden');
+          }
+        });
+      }
+
+      // Search event listener
+      searchInput.addEventListener('input', (e) => {
+        filterProducts(e.target.value);
+      });
+
+      // Clear search when modal is opened
+      searchInput.value = '';
+      filterProducts('');
+    }
+
+    // Settings Modal Management
+    function openSettingsModal() {
+      const modal = document.getElementById('settings-modal');
+      modal.style.display = 'flex';
+      
+      // Load current settings into form
+      document.getElementById('check-interval').value = currentSettings.checkInterval;
+      document.getElementById('ntfy-enabled').checked = currentSettings.ntfyAppEnabled;
+      document.getElementById('email-enabled').checked = currentSettings.ntfyEmailEnabled;
+      document.getElementById('ntfy-topic').value = currentSettings.ntfyTopic;
+      document.getElementById('ntfy-server').value = currentSettings.ntfyServer;
+      document.getElementById('ntfy-email').value = currentSettings.ntfyEmail;
+      
+      // Update the minutes suffix position immediately after setting the value
+      requestAnimationFrame(updateMinutesSuffixPosition);
+      
+      // Set multiple select values
+      const tierSelect = document.getElementById('notification-tier');
+      const weightSelect = document.getElementById('notification-weight');
+
+      // Clear previous selections
+      Array.from(tierSelect.options).forEach(option => option.selected = false);
+      Array.from(weightSelect.options).forEach(option => option.selected = false);
+      
+      // Set new selections
+      currentSettings.notificationTiers.forEach(tier => {
+        const option = Array.from(tierSelect.options).find(opt => opt.value === tier);
+        if (option) option.selected = true;
+      });
+      
+      currentSettings.notificationWeights.forEach(weight => {
+        const option = Array.from(weightSelect.options).find(opt => opt.value === weight);
+        if (option) option.selected = true;
+      });
+      
+      // If nothing is selected, select 'all' by default
+      if (!Array.from(tierSelect.selectedOptions).length) {
+        tierSelect.querySelector('option[value="all"]').selected = true;
+      }
+      if (!Array.from(weightSelect.selectedOptions).length) {
+        weightSelect.querySelector('option[value="all"]').selected = true;
+      }
+      
+      // Set checkboxes
+      document.getElementById('notify-new').checked = currentSettings.notifyNew;
+      document.getElementById('notify-stock').checked = currentSettings.notifyStock;
+      document.getElementById('notify-removed').checked = currentSettings.notifyRemoved;
+      
+      // Update product list and clear search
+      updateProductSelectList();
+
+      document.body.classList.add('modal-open');
+    }
+
+    function closeSettingsModal() {
+      document.getElementById('settings-modal').style.display = 'none';
+      document.body.classList.remove('modal-open');
+    }
+
+    function getSelectedValues(selectElement) {
+      const selectedValues = Array.from(selectElement.selectedOptions).map(option => option.value);
+      // If nothing is selected or only 'all' is selected, return ['all']
+      return selectedValues.length === 0 ? ['all'] : selectedValues;
+    }
+
+    function saveSettingsFromForm() {
+      const newSettings = {
+        checkInterval: parseInt(document.getElementById('check-interval').value) || DEFAULT_SETTINGS.checkInterval,
+        notificationTiers: getSelectedValues(document.getElementById('notification-tier')),
+        notificationWeights: getSelectedValues(document.getElementById('notification-weight')),
+        notifyNew: document.getElementById('notify-new').checked,
+        notifyStock: document.getElementById('notify-stock').checked,
+        notifyRemoved: document.getElementById('notify-removed').checked,
+        specificProducts: Array.from(document.querySelectorAll('#product-select input:checked')).map(cb => cb.value),
+        ntfyAppEnabled: document.getElementById('ntfy-enabled').checked,
+        ntfyEmailEnabled: document.getElementById('email-enabled').checked,
+        ntfyTopic: document.getElementById('ntfy-topic').value.trim(),
+        ntfyServer: document.getElementById('ntfy-server').value.trim() || DEFAULT_SETTINGS.ntfyServer,
+        ntfyEmail: document.getElementById('ntfy-email').value.trim()
+      };
+
+      // Update Ntfy config
+      NTFY_CONFIG.appEnabled = newSettings.ntfyAppEnabled;
+      NTFY_CONFIG.emailEnabled = newSettings.ntfyEmailEnabled;
+      NTFY_CONFIG.topic = newSettings.ntfyTopic;
+      NTFY_CONFIG.server = newSettings.ntfyServer;
+      NTFY_CONFIG.email = newSettings.ntfyEmail;
+
+      // Log the settings being saved
+      console.log('Saving settings:', newSettings);
+
+      saveSettings(newSettings);
+      closeSettingsModal();
+    }
+
+    // Event listeners for the multiple selects
+    document.addEventListener('DOMContentLoaded', () => {
+      const tierSelect = document.getElementById('notification-tier');
+      const weightSelect = document.getElementById('notification-weight');
+
+      function handleAllOption(selectElement) {
+        selectElement.addEventListener('change', (e) => {
+          const allOption = selectElement.querySelector('option[value="all"]');
+          const otherOptions = Array.from(selectElement.options).filter(opt => opt.value !== 'all');
+          
+          if (allOption.selected) {
+            // If 'all' is selected, deselect other options
+            otherOptions.forEach(opt => opt.selected = false);
+          } else if (Array.from(selectElement.selectedOptions).length === 0) {
+            // If nothing is selected, select 'all'
+            allOption.selected = true;
+          } else {
+            // If other options are selected, deselect 'all'
+            allOption.selected = false;
+          }
+        });
+      }
+
+      handleAllOption(tierSelect);
+      handleAllOption(weightSelect);
+    });
+
+
+
+    // Dynamic suffix positioning
+    function updateMinutesSuffixPosition() {
+      const input = document.getElementById('check-interval');
+      const suffix = input.nextElementSibling;
+      const valueLength = input.value.length;
+      const basePosition = 28; // Base position for single digit
+      const digitWidth = 8; // Approximate width per digit
+      
+      // Calculate new position based on number of digits
+      const newPosition = basePosition + (valueLength - 1) * digitWidth;
+      suffix.style.left = `${newPosition}px`;
+    }
+
+    // Event listeners for the check interval input
+    document.addEventListener('DOMContentLoaded', () => {
+      const checkIntervalInput = document.getElementById('check-interval');
+      
+      // Update position on any input change
+      checkIntervalInput.addEventListener('input', updateMinutesSuffixPosition);
+      
+      // Initial position
+      updateMinutesSuffixPosition();
+    });
+
+    // Test Ntfy notification
+    let testButtonCooldown = false;
+    const COOLDOWN_PERIOD = 30000; // 10 seconds in milliseconds
+
+    async function testNtfyNotification() {
+      if (testButtonCooldown) {
+        return;
+      }
+
+      // Get current form values instead of using saved settings
+      const appEnabled = document.getElementById('ntfy-enabled').checked;
+      const emailEnabled = document.getElementById('email-enabled').checked;
+      const topic = document.getElementById('ntfy-topic').value.trim();
+      const server = document.getElementById('ntfy-server').value.trim() || DEFAULT_SETTINGS.ntfyServer;
+      const email = document.getElementById('ntfy-email').value.trim();
+
+      if (!appEnabled && !emailEnabled) {
+        alert('Please enable at least one notification method');
+        return;
+      }
+
+      if (appEnabled && !topic) {
+        alert('Please set a topic for app notifications');
+        return;
+      }
+
+      if (emailEnabled && !email) {
+        alert('Please set an email address for email notifications');
+        return;
+      }
+
+      const testButton = document.getElementById('test-ntfy');
+      testButton.disabled = true;
+      testButton.textContent = 'Sending...';
+
+      // Set cooldown flag
+      testButtonCooldown = true;
+
+      try {
+        // Create temporary config for test
+        const tempConfig = {
+          appEnabled: appEnabled,
+          emailEnabled: emailEnabled,
+          topic: topic,
+          server: server,
+          email: email
+        };
+
+        // Store current config
+        const originalConfig = { ...NTFY_CONFIG };
+        
+        // Temporarily set config to form values
+        Object.assign(NTFY_CONFIG, tempConfig);
+
+        const testMessage = `🌟 NEW PRODUCTS (2) 🌟
+
+🌿 Blue Dream THCA Flower
+   • Essential 28g
+     💰 $49.99
+
+🌿 Purple Punch THCA Flower
+   • Supreme 28g
+     💰 $89.99
+
+
+📦 STOCK CHANGES (2) 📦
+
+🌿 Gelato THCA Flower
+
+   ✅ NOW IN STOCK:
+      • Essential 28g
+        💰 $49.99
+
+   ❌ NOW OUT OF STOCK:
+      • Preferred 28g
+        💰 $69.99
+
+
+🌿 Wedding Cake THCA Flower
+
+   ✅ NOW IN STOCK:
+      • Supreme 28g
+        💰 $89.99
+
+
+🚫 REMOVED PRODUCTS (1) 🚫
+
+❌ Northern Lights THCA Flower
+
+
+🕒 Updated: ${new Date().toLocaleString()}`;
+
+        await sendNtfyNotification(
+          'LitFarms Test Notification',
+          testMessage
+        );
+        testButton.textContent = 'Notification Sent!';
+
+        // Restore original config
+        Object.assign(NTFY_CONFIG, originalConfig);
+      } catch (error) {
+        console.error('Failed to send test notification:', error);
+        testButton.textContent = 'Error!';
+        
+        // Restore original config in case of error
+        Object.assign(NTFY_CONFIG, originalConfig);
+      }
+
+      // Start cooldown timer
+      setTimeout(() => {
+        testButtonCooldown = false;
+        testButton.disabled = false;
+        testButton.textContent = 'Test Notifications';
+      }, COOLDOWN_PERIOD);
+
+      // Countdown timer
+      let remainingTime = COOLDOWN_PERIOD / 1000;
+      const countdownInterval = setInterval(() => {
+        remainingTime--;
+        if (remainingTime > 0) {
+          testButton.textContent = `Wait ${remainingTime}s`;
+        } else {
+          clearInterval(countdownInterval);
+        }
+      }, 1000);
+    }
+
+    // Update selected products count
+    function updateSelectedProductsCount() {
+      const selectedCount = document.querySelectorAll('#product-select input:checked').length;
+      const countElement = document.getElementById('products-selected-count');
+      countElement.textContent = `${selectedCount} product${selectedCount === 1 ? '' : 's'} selected`;
+    }
+
+    // Deselect all products
+    function deselectAllProducts() {
+      const checkboxes = document.querySelectorAll('#product-select input[type="checkbox"]');
+      checkboxes.forEach(checkbox => {
+        checkbox.checked = false;
+      });
+      updateSelectedProductsCount();
+    }
+
+    // Update the updateProductSelectList function to include count updates
+    function updateProductSelectList() {
+      const productSelect = document.getElementById('product-select');
+      productSelect.innerHTML = '';
+
+      // Sort products alphabetically by title
+      const sortedProducts = [...products].sort((a, b) => 
+        a.title.toLowerCase().localeCompare(b.title.toLowerCase())
+      );
+
+      sortedProducts.forEach(product => {
+        const item = document.createElement('div');
+        item.className = 'product-select-item';
+        
+        const checkbox = document.createElement('input');
+        checkbox.type = 'checkbox';
+        checkbox.id = `product-${product.handle}`;
+        checkbox.value = product.handle;
+        checkbox.checked = currentSettings.specificProducts.includes(product.handle);
+        
+        // Update count
+        checkbox.addEventListener('change', updateSelectedProductsCount);
+        
+        const label = document.createElement('label');
+        label.htmlFor = `product-${product.handle}`;
+        label.textContent = product.title;
+        
+        item.appendChild(checkbox);
+        item.appendChild(label);
+        productSelect.appendChild(item);
+      });
+
+      // Update initial count
+      updateSelectedProductsCount();
+
+      // Search functionality
+      const searchInput = document.getElementById('product-search');
+      
+      function filterProducts(searchTerm) {
+        const items = productSelect.getElementsByClassName('product-select-item');
+        const term = searchTerm.toLowerCase();
+        
+        Array.from(items).forEach(item => {
+          const label = item.querySelector('label');
+          const title = label.textContent.toLowerCase();
+          
+          if (title.includes(term)) {
+            item.classList.remove('hidden');
+          } else {
+            item.classList.add('hidden');
+          }
+        });
+      }
+
+      // Search event listener
+      searchInput.addEventListener('input', (e) => {
+        filterProducts(e.target.value);
+      });
+
+      // Clear search when modal is opened
+      searchInput.value = '';
+      filterProducts('');
+    }
+
+    // Topic name arrays
+    const ADJECTIVES = ['swift', 'bright', 'cosmic', 'mystic', 'golden', 'silver', 'crystal', 'azure', 'crimson', 'emerald'];
+    const NOUNS = ['phoenix', 'dragon', 'falcon', 'tiger', 'wolf', 'eagle', 'lion', 'hawk', 'panther', 'bear'];
+    
+    // Random topic name generator
+    function generateRandomTopic() {
+      // Get random elements from arrays
+      const adjective = ADJECTIVES[Math.floor(Math.random() * ADJECTIVES.length)];
+      const noun = NOUNS[Math.floor(Math.random() * NOUNS.length)];
+      
+      // Generate random numbers (4 digits)
+      const numbers = Math.floor(1000 + Math.random() * 9000);
+      
+      // Generate random letters (2 characters)
+      const letters = String.fromCharCode(65 + Math.floor(Math.random() * 26)) + 
+                     String.fromCharCode(65 + Math.floor(Math.random() * 26));
+      
+      // Combine everything with dashes
+      const topic = `litfarms-${adjective}-${noun}-${numbers}${letters}`;
+      
+      // Set the value in the input field
+      document.getElementById('ntfy-topic').value = topic;
+    }
+
+    // Clear search functionality
+    const clearSearchButton = document.getElementById('clear-search');
+    const searchInput = document.getElementById('product-search-filter');
+
+    // Show/hide clear button based on search input content
+    searchInput.addEventListener('input', () => {
+      clearSearchButton.style.display = searchInput.value ? 'flex' : 'none';
+      filterProducts();
+      saveFilterState();
+    });
+
+    // Move cursor to end when input receives focus
+    searchInput.addEventListener('focus', () => {
+      const length = searchInput.value.length;
+      searchInput.setSelectionRange(length, length);
+    });
+
+    // Close keyboard on enter key press
+    searchInput.addEventListener('keypress', (e) => {
+      if (e.key === 'Enter') {
+        searchInput.blur(); // This will close the keyboard on mobile
+      }
+    });
+
+    // Clear search when button is clicked
+    clearSearchButton.addEventListener('click', () => {
+      searchInput.value = '';
+      clearSearchButton.style.display = 'none';
+      filterProducts();
+      saveFilterState();
+    });
+
+    // Utility Functions
+    const WEIGHTS = ['28g', '3.5g', '7g'];
+    const TIERS = ['Essential', 'Preferred', 'Supreme'];
+    
+    const utils = {
+      isWeight: (value) => value && WEIGHTS.includes(value),
+      isTier: (value) => value && TIERS.includes(value),
+      hasValidPrice: (variant) => variant.price && !isNaN(parseFloat(variant.price)) && parseFloat(variant.price) > 0,
+      
+      standardizeWeight: (weightStr) => {
+        if (!weightStr) return null;
+        weightStr = weightStr.trim();
+        if (weightStr.match(/^\d+\.?\d*$/)) weightStr += 'g';
+        if (weightStr === '3.5') weightStr = '3.5g';
+        return weightStr;
+      },
+      
+      processVariants: (product) => {
+        return product.variants.map(v => {
+          const weight = utils.isWeight(v.option1) ? v.option1 : utils.isWeight(v.option2) ? v.option2 : null;
+          let tier = utils.isTier(v.option1) ? v.option1 : utils.isTier(v.option2) ? v.option2 : null;
+          if (weight && !tier) tier = 'Essential';
+          return {
+            ...v,
+            correctedWeight: weight,
+            correctedTier: tier,
+            hasPrice: utils.hasValidPrice(v)
+          };
+        }).filter(v => v.correctedWeight && v.hasPrice);
+      },
+      
+      getVariantKey: (variant) => 
+        `${variant.correctedTier}-${variant.correctedWeight}-${variant.price}-${variant.available}`,
+        
+      extractTierAndWeight: (str) => {
+        const parts = str.split('/').map(s => s.trim());
+        const weightPart = parts.find(p => utils.isWeight(utils.standardizeWeight(p)));
+        const tierPart = parts.find(p => TIERS.includes(p));
+        return { 
+          weight: weightPart ? utils.standardizeWeight(weightPart) : null, 
+          tier: tierPart 
+        };
+      },
+
+      sortProducts: (products, sortFilter, strainFilter, weightFilter) => {
+        return [...products].sort((a, b) => {
+          switch (sortFilter) {
+            case 'alpha-asc':
+              return a.title.localeCompare(b.title);
+            case 'alpha-desc':
+              return b.title.localeCompare(a.title);
+            case 'price-asc':
+            case 'price-desc': {
+              // Get valid variants for both products
+              const aVariants = utils.processVariants(a);
+              const bVariants = utils.processVariants(b);
+
+              // Filter variants based on current filters
+              let relevantAVariants = aVariants;
+              let relevantBVariants = bVariants;
+
+              if (weightFilter !== 'all') {
+                relevantAVariants = relevantAVariants.filter(v => v.correctedWeight === weightFilter);
+                relevantBVariants = relevantBVariants.filter(v => v.correctedWeight === weightFilter);
+              }
+              if (strainFilter !== 'all') {
+                relevantAVariants = relevantAVariants.filter(v => v.correctedTier === strainFilter);
+                relevantBVariants = relevantBVariants.filter(v => v.correctedTier === strainFilter);
+              }
+              
+              // If in "In Stock Only" mode, only consider available variants
+              if (!domElements.stockFilter.classList.contains('active')) {
+                relevantAVariants = relevantAVariants.filter(v => v.available);
+                relevantBVariants = relevantBVariants.filter(v => v.available);
+              }
+
+              // If no relevant variants after filtering, push to end of sort
+              if (relevantAVariants.length === 0) return 1;
+              if (relevantBVariants.length === 0) return -1;
+
+              // Get the min/max prices for comparison
+              const aPrice = relevantAVariants.length ? 
+                (sortFilter === 'price-asc' ? 
+                  Math.min(...relevantAVariants.map(v => parseFloat(v.price))) : 
+                  Math.max(...relevantAVariants.map(v => parseFloat(v.price)))) : 
+                Infinity;
+              const bPrice = relevantBVariants.length ? 
+                (sortFilter === 'price-asc' ? 
+                  Math.min(...relevantBVariants.map(v => parseFloat(v.price))) : 
+                  Math.max(...relevantBVariants.map(v => parseFloat(v.price)))) : 
+                Infinity;
+
+              // If prices are equal, sort alphabetically
+              if (aPrice === bPrice) {
+                return a.title.localeCompare(b.title);
+              }
+
+              return sortFilter === 'price-asc' ? aPrice - bPrice : bPrice - aPrice;
+            }
+            default:
+              return 0;
+          }
+        });
+      }
+    };
+
+    // Cache frequently accessed DOM elements
+    const domElements = {
+      productGrid: document.getElementById('product-grid'),
+      productCount: document.getElementById('product-count'),
+      strainFilter: document.getElementById('strain-filter'),
+      strainTypeFilter: document.getElementById('strain-type-filter'),
+      weightFilter: document.getElementById('weight-filter'),
+      sortFilter: document.getElementById('sort-filter'),
+      stockFilter: document.getElementById('stock-filter'),
+      searchInput: document.getElementById('product-search-filter'),
+      clearSearch: document.getElementById('clear-search'),
+      loader: document.getElementById('loader'),
+      settingsModal: document.getElementById('settings-modal')
+    };
+
+    // Constants for logging
+    const LOG_LEVELS = {
+      INFO: 'INFO',
+      WARN: 'WARN',
+      ERROR: 'ERROR'
+    };
+
+    function log(level, message, data = null) {
+      const logMessage = `${message}`;
+      
+      switch(level) {
+        case LOG_LEVELS.ERROR:
+          data ? console.error(logMessage, data) : console.error(logMessage);
+          break;
+        case LOG_LEVELS.WARN:
+          data ? console.warn(logMessage, data) : console.warn(logMessage);
+          break;
+        default:
+          data ? console.log(logMessage, data) : console.log(logMessage);
+      }
+    }
+  </script>
+
+  <!-- Settings Button -->
+  <button id="settings-button" title="Notification Settings">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+      <path d="M12 15a3 3 0 100-6 3 3 0 000 6z" />
+      <path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 010 2.83 2 2 0 01-2.83 0l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-2 2 2 2 0 01-2-2v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 01-2.83 0 2 2 0 010-2.83l.06-.06a1.65 1.65 0 00.33-1.82 1.65 1.65 0 00-1.51-1H3a2 2 0 01-2-2 2 2 0 012-2h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 010-2.83 2 2 0 012.83 0l.06.06a1.65 1.65 0 001.82.33H9a1.65 1.65 0 001-1.51V3a2 2 0 012-2 2 2 0 012 2v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 012.83 0 2 2 0 010 2.83l-.06.06a1.65 1.65 0 00-.33 1.82V9a1.65 1.65 0 001.51 1H21a2 2 0 012 2 2 2 0 01-2 2h-.09a1.65 1.65 0 00-1.51 1z" />
+    </svg>
+  </button>
+
+  <!-- Settings Modal -->
+  <div class="modal-overlay" id="settings-modal">
+    <div class="modal">
+      <div class="modal-header">
+        <h2 class="modal-title">Notification Settings</h2>
+        <button class="close-modal">&times;</button>
+      </div>
+      
+      <div class="settings-section">
+        <h3>Update Frequency</h3>
+        <div class="settings-input-group">
+          <input type="number" id="check-interval" class="settings-input" min="1" value="5" placeholder="5">
+          <span class="settings-input-suffix">minutes</span>
+        </div>
+      </div>
+
+      <div class="settings-section">
+        <h3>Notifications</h3>
+        <div style="margin-bottom: 20px;">
+          <div class="settings-checkbox">
+            <input type="checkbox" id="ntfy-enabled">
+            <label for="ntfy-enabled">Enable App Notifications</label>
+          </div>
+          <small style="color: var(--text-muted); display: block; margin-left: 25px;">
+            Receive notifications on your phone via the Ntfy app
+          </small>
+        </div>
+
+        <div style="margin-bottom: 20px;">
+          <div class="settings-checkbox">
+            <input type="checkbox" id="email-enabled">
+            <label for="email-enabled">Enable Email Notifications</label>
+          </div>
+          <small style="color: var(--text-muted); display: block; margin-left: 25px;">
+            Receive notifications via email
+          </small>
+        </div>
+        
+        <div style="margin-top: 10px;">
+          <label for="ntfy-topic">Ntfy Topic:</label>
+          <div style="display: flex; gap: 8px; margin-bottom: 4px;">
+            <input type="text" id="ntfy-topic" class="settings-input notification-input" placeholder="Enter your unique topic name" style="flex: 1;">
+            <button onclick="generateRandomTopic()" style="background-color: var(--accent-secondary); color: var(--bg-primary); border: none; padding: 8px 12px; border-radius: 4px; cursor: pointer; white-space: nowrap;">
+              Generate Random
+            </button>
+          </div>
+          <small style="color: var(--text-muted); display: block; margin-bottom: 10px;">
+            This is your private notification channel. Required for app notifications. Use the generate button for a unique topic name.
+          </small>
+        </div>
+
+        <div style="margin-top: 10px;">
+          <label for="ntfy-email">Email Address:</label>
+          <input type="email" id="ntfy-email" class="settings-input notification-input" placeholder="your@email.com">
+          <small style="color: var(--text-muted); display: block; margin-bottom: 10px;">
+            Required for email notifications.
+          </small>
+        </div>
+
+        <div style="margin-top: 10px;">
+          <label for="ntfy-server">Ntfy Server (optional):</label>
+          <input type="text" id="ntfy-server" class="settings-input notification-input" placeholder="https://ntfy.sh">
+          <small style="color: var(--text-muted); display: block; margin-bottom: 10px;">
+            Leave as default unless you're using a self-hosted server.
+          </small>
+        </div>
+
+        <button id="test-ntfy" onclick="testNtfyNotification()" style="background-color: var(--accent-primary); color: var(--bg-primary); border: none; padding: 8px 16px; border-radius: 4px; cursor: pointer; margin-top: 10px;">
+          Test Notifications
+        </button>
+
+        <div style="margin-top: 15px; padding: 10px; background: var(--bg-elevated); border-radius: 4px;">
+          <p style="margin: 0 0 10px 0; color: var(--text-secondary);">To receive app notifications:</p>
+          <ol style="margin: 0; padding-left: 20px; color: var(--text-muted);">
+            <li>Download the Ntfy app for <a href="https://apps.apple.com/us/app/ntfy/id1625396347" target="_blank" style="color: var(--accent-primary);">iOS</a> or <a href="https://play.google.com/store/apps/details?id=io.heckel.ntfy" target="_blank" style="color: var(--accent-primary);">Android</a></li>
+            <li>Open the app and tap "Add subscription"</li>
+            <li>Enter your topic name exactly as above</li>
+            <li>Save and wait for notifications!</li>
+          </ol>
+        </div>
+      </div>
+
+      <div class="settings-section">
+        <h3>Product Filters</h3>
+        <label for="notification-tier">Select Tiers (hold Ctrl/Cmd to select multiple):</label>
+        <select id="notification-tier" class="settings-select" multiple size="4">
+          <option value="all">All Tiers</option>
+          <option value="Essential">Essential</option>
+          <option value="Preferred">Preferred</option>
+          <option value="Supreme">Supreme</option>
+        </select>
+
+        <label for="notification-weight">Select Weights (hold Ctrl/Cmd to select multiple):</label>
+        <select id="notification-weight" class="settings-select" multiple size="3">
+          <option value="all">All Weights</option>
+          <option value="28g">28g</option>
+          <option value="3.5g">3.5g</option>
+        </select>
+
+        <div class="settings-checkbox">
+          <input type="checkbox" id="notify-new" checked>
+          <label for="notify-new">Notify for new products</label>
+        </div>
+
+        <div class="settings-checkbox">
+          <input type="checkbox" id="notify-stock" checked>
+          <label for="notify-stock">Notify for stock changes</label>
+        </div>
+
+        <div class="settings-checkbox">
+          <input type="checkbox" id="notify-removed" checked>
+          <label for="notify-removed">Notify for removed products</label>
+        </div>
+      </div>
+
+      <div class="settings-section">
+        <h3>Specific Products</h3>
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+          <span id="products-selected-count" style="color: var(--text-muted);">0 products selected</span>
+          <button id="deselect-all-products" onclick="deselectAllProducts()" style="background: none; border: none; color: var(--accent-primary); cursor: pointer; font-size: 0.9em;">
+            Deselect All
+          </button>
+        </div>
+        <div class="product-search">
+          <input type="text" id="product-search" placeholder="Search products...">
+        </div>
+        <div class="product-select-container" id="product-select">
+          <!-- Product checkboxes will be dynamically added here -->
+        </div>
+      </div>
+
+      <button class="save-settings">Save Settings</button>
+    </div>
+  </div>
+</body>
+</html>
