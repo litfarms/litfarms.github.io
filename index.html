@@ -191,6 +191,50 @@
       }
     }
 
+    /* Extra small screens */
+    @media (max-width: 400px) {
+      .product-grid {
+        grid-template-columns: 1fr;
+        gap: 12px;
+        padding: 8px;
+      }
+
+      .product-card {
+        padding: 8px;
+        max-width: 100%;
+      }
+
+      .filters {
+        gap: 6px;
+      }
+
+      .filters select, .filters button {
+        padding: 8px;
+        font-size: 0.9em;
+        min-width: 0;
+      }
+
+      .variant-title {
+        font-size: 1.2em;
+      }
+
+      .weight-label {
+        font-size: 1.1em;
+      }
+
+      .weight-price {
+        font-size: 1.5em;
+      }
+
+      .weight-row {
+        padding: 4px 6px;
+      }
+
+      .weight-info {
+        gap: 8px;
+      }
+    }
+
     .product-card:hover {
       transform: scale(1.025);
       box-shadow: var(--shadow-hover);
