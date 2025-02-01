@@ -8,59 +8,8 @@
   <link rel="icon" href="data:image/svg+xml,<?xml version='1.0' encoding='UTF-8' standalone='no'?><svg width='4.6079073in' height='2.5213542in' viewBox='0 0 117.04084 64.042396' version='1.1' id='svg1' xml:space='preserve' xmlns='http://www.w3.org/2000/svg'><defs id='defs1'/><g id='layer1' transform='translate(-46.479583,-116.4788)'><rect style='display:inline;opacity:1;fill:none;fill-opacity:1;stroke:%23ffffff;stroke-width:6;stroke-dasharray:none;stroke-opacity:1' id='rect2' width='111.04084' height='58.0424' x='49.47958' y='119.4788'/><g id='g6' style='opacity:1;fill:%23ffffff;fill-opacity:1' transform='matrix(1,0,0,1.0224587,0.56861157,30.651474)'><rect style='opacity:1;fill:%23ffffff;fill-opacity:1;stroke:none;stroke-width:6.57396;stroke-dasharray:none;stroke-opacity:1' id='rect5' width='25.801872' height='5.860003' x='119.94384' y='98.674728' ry='0'/><rect style='opacity:1;fill:%23ffffff;fill-opacity:1;stroke:none;stroke-width:6.03661;stroke-dasharray:none;stroke-opacity:1' id='rect6' width='6' height='30.334635' x='130.05539' y='101.46412'/></g><path style='opacity:1;fill:%23ffffff;fill-opacity:1;stroke:none;stroke-width:5.81338;stroke-dasharray:none;stroke-opacity:1' d='m 100.03961,131.46649 h 6 v 33.97218 h -6 z' id='path4'/><g id='g9' transform='matrix(1,0,0,1.0199169,-0.14807164,31.087934)'><rect style='opacity:1;fill:%23ffffff;fill-opacity:1;stroke:none;stroke-width:5.43999;stroke-dasharray:none;stroke-opacity:1' id='rect8' width='6' height='33.229393' x='64.364632' y='98.429321'/><rect style='opacity:1;fill:%23ffffff;fill-opacity:1;stroke:none;stroke-width:5.84555;stroke-dasharray:none;stroke-opacity:1' id='rect9' width='21.184687' height='5.8828321' x='64.373192' y='125.75582'/></g></g></svg>">
   <link rel="stylesheet" href="style.css">
   <style>
-    /* Add these styles */
-    .site-status {
-      position: fixed;
-      top: 0;
-      left: 0;
-      right: 0;
-      padding: 10px;
-      text-align: center;
-      z-index: 1000;
-      font-size: 14px;
-      display: none;
-      animation: slideDown 0.3s ease-out;
-    }
-
-    .site-status.error {
-      background-color: rgba(255, 0, 0, 0.1);
-      color: #ff4444;
-      border-bottom: 1px solid rgba(255, 0, 0, 0.2);
-    }
-
-    .site-status.warning {
-      background-color: rgba(255, 165, 0, 0.1);
-      color: #ffa500;
-      border-bottom: 1px solid rgba(255, 165, 0, 0.2);
-    }
-
-    @keyframes slideDown {
-      from { transform: translateY(-100%); }
-      to { transform: translateY(0); }
-    }
-
-    .retry-button {
-      display: inline-block;
-      margin-left: 10px;
-      padding: 2px 8px;
-      border-radius: 4px;
-      cursor: pointer;
-      font-size: 12px;
-      border: 1px solid currentColor;
-      background: transparent;
-      color: inherit;
-    }
-
-    .retry-button:hover {
-      background-color: rgba(255, 255, 255, 0.1);
-    }
-
-    /* Adjust header margin to account for status bar */
-    .header {
-      margin-top: 40px; /* Add space for status bar */
-    }
+  
   </style>
-  <!-- Add this right after the settings button, before the settings modal -->
   <div class="countdown-container">
     <div class="countdown-tooltip">Next check in: <span class="tooltip-time">5:00</span></div>
     <div class="countdown-circle">
@@ -73,13 +22,11 @@
   </div>
 </head>
 <body>
-  <!-- Add this right after the body tag -->
   <div id="site-status" class="site-status">
     <span id="status-message"></span>
     <button id="retry-button" class="retry-button" style="display: none;">Retry Now</button>
   </div>
   <div class="header">
-    <!-- Add link around SVG -->
     <a href="https://www.litfarms.com" class="header-link">
       <svg width="75" height="75" viewBox="0 0 117.04084 64.042396" version="1.1" id="svg1" xml:space="preserve" xmlns="http://www.w3.org/2000/svg">
         <defs id="defs1"></defs>
@@ -97,7 +44,6 @@
         </g>
       </svg>
     </a>
-    <!-- Add link around title -->
     <a href="https://www.litfarms.com" class="header-link">
       <h1>Farms Products</h1>
     </a>
