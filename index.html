@@ -8,7 +8,57 @@
   <link rel="icon" href="data:image/svg+xml,<?xml version='1.0' encoding='UTF-8' standalone='no'?><svg width='4.6079073in' height='2.5213542in' viewBox='0 0 117.04084 64.042396' version='1.1' id='svg1' xml:space='preserve' xmlns='http://www.w3.org/2000/svg'><defs id='defs1'/><g id='layer1' transform='translate(-46.479583,-116.4788)'><rect style='display:inline;opacity:1;fill:none;fill-opacity:1;stroke:%23ffffff;stroke-width:6;stroke-dasharray:none;stroke-opacity:1' id='rect2' width='111.04084' height='58.0424' x='49.47958' y='119.4788'/><g id='g6' style='opacity:1;fill:%23ffffff;fill-opacity:1' transform='matrix(1,0,0,1.0224587,0.56861157,30.651474)'><rect style='opacity:1;fill:%23ffffff;fill-opacity:1;stroke:none;stroke-width:6.57396;stroke-dasharray:none;stroke-opacity:1' id='rect5' width='25.801872' height='5.860003' x='119.94384' y='98.674728' ry='0'/><rect style='opacity:1;fill:%23ffffff;fill-opacity:1;stroke:none;stroke-width:6.03661;stroke-dasharray:none;stroke-opacity:1' id='rect6' width='6' height='30.334635' x='130.05539' y='101.46412'/></g><path style='opacity:1;fill:%23ffffff;fill-opacity:1;stroke:none;stroke-width:5.81338;stroke-dasharray:none;stroke-opacity:1' d='m 100.03961,131.46649 h 6 v 33.97218 h -6 z' id='path4'/><g id='g9' transform='matrix(1,0,0,1.0199169,-0.14807164,31.087934)'><rect style='opacity:1;fill:%23ffffff;fill-opacity:1;stroke:none;stroke-width:5.43999;stroke-dasharray:none;stroke-opacity:1' id='rect8' width='6' height='33.229393' x='64.364632' y='98.429321'/><rect style='opacity:1;fill:%23ffffff;fill-opacity:1;stroke:none;stroke-width:5.84555;stroke-dasharray:none;stroke-opacity:1' id='rect9' width='21.184687' height='5.8828321' x='64.373192' y='125.75582'/></g></g></svg>">
   <link rel="stylesheet" href="style.css">
   <style>
+    /* Add these styles */
+    .site-status {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      padding: 10px;
+      text-align: center;
+      z-index: 1000;
+      font-size: 14px;
+      display: none;
+      animation: slideDown 0.3s ease-out;
+    }
 
+    .site-status.error {
+      background-color: rgba(255, 0, 0, 0.1);
+      color: #ff4444;
+      border-bottom: 1px solid rgba(255, 0, 0, 0.2);
+    }
+
+    .site-status.warning {
+      background-color: rgba(255, 165, 0, 0.1);
+      color: #ffa500;
+      border-bottom: 1px solid rgba(255, 165, 0, 0.2);
+    }
+
+    @keyframes slideDown {
+      from { transform: translateY(-100%); }
+      to { transform: translateY(0); }
+    }
+
+    .retry-button {
+      display: inline-block;
+      margin-left: 10px;
+      padding: 2px 8px;
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 12px;
+      border: 1px solid currentColor;
+      background: transparent;
+      color: inherit;
+    }
+
+    .retry-button:hover {
+      background-color: rgba(255, 255, 255, 0.1);
+    }
+
+    /* Adjust header margin to account for status bar */
+    .header {
+      margin-top: 40px; /* Add space for status bar */
+    }
   </style>
   <!-- Add this right after the settings button, before the settings modal -->
   <div class="countdown-container">
@@ -23,6 +73,11 @@
   </div>
 </head>
 <body>
+  <!-- Add this right after the body tag -->
+  <div id="site-status" class="site-status">
+    <span id="status-message"></span>
+    <button id="retry-button" class="retry-button" style="display: none;">Retry Now</button>
+  </div>
   <div class="header">
     <!-- Add link around SVG -->
     <a href="https://www.litfarms.com" class="header-link">
@@ -1326,8 +1381,36 @@
       });
     });
 
-    // Update attemptLoad function with cleanup
+    // Add these utility functions for status management
+    const statusManager = {
+      show: (message, type = 'error') => {
+        const statusBar = document.getElementById('site-status');
+        const statusMessage = document.getElementById('status-message');
+        const retryButton = document.getElementById('retry-button');
+        
+        statusBar.className = `site-status ${type}`;
+        statusMessage.textContent = message;
+        statusBar.style.display = 'block';
+        
+        // Show retry button for errors
+        retryButton.style.display = type === 'error' ? 'inline-block' : 'none';
+      },
+      
+      hide: () => {
+        const statusBar = document.getElementById('site-status');
+        statusBar.style.display = 'none';
+      },
+      
+      update: (message) => {
+        const statusMessage = document.getElementById('status-message');
+        statusMessage.textContent = message;
+      }
+    };
+
+    // Update attemptLoad function with better error handling
     async function attemptLoad() {
+      let retryCount = 0;
+      const maxRetries = 3;
       let imagePreloadAbortController = new AbortController();
       
       // Add cleanup handler
@@ -1338,102 +1421,128 @@
         }
       });
 
-      try {
-        // Load notification settings first
-        loadSettings();
-        
-        // First try to load cached products immediately
-        products = await getProducts(true);
-        
-        if (Array.isArray(products) && products.length > 0) {
-          console.log(`Loaded ${products.length} cached THCA products`);
-          loadFilterState();
-          await loadStrainData();
+      async function tryLoad() {
+        try {
+          // Hide any existing status messages
+          statusManager.hide();
           
-          // Show products immediately
-          toggleLoader(false);
-          filterProducts();
+          // Load notification settings first
+          loadSettings();
           
-          // Then check for updates in the background
-          try {
-            const updatedProducts = await getProducts(false);
-            if (JSON.stringify(products) !== JSON.stringify(updatedProducts)) {
-              console.log('Products updated, refreshing display');
-              products = updatedProducts;
-              filterProducts();
+          // First try to load cached products immediately
+          products = await getProducts(true);
+          
+          if (Array.isArray(products) && products.length > 0) {
+            console.log(`Loaded ${products.length} cached THCA products`);
+            loadFilterState();
+            await loadStrainData();
+            
+            // Show products immediately
+            toggleLoader(false);
+            filterProducts();
+            
+            // Then check for updates in the background
+            try {
+              const updatedProducts = await getProducts(false);
+              if (JSON.stringify(products) !== JSON.stringify(updatedProducts)) {
+                console.log('Products updated, refreshing display');
+                products = updatedProducts;
+                filterProducts();
+              }
+            } catch (updateError) {
+              console.warn('Background update failed:', updateError);
+              if (updateError.message.includes('401')) {
+                statusManager.show('LitFarms website is currently in maintenance mode. Using cached data.', 'warning');
+              }
             }
-          } catch (updateError) {
-            console.warn('Background update failed:', updateError);
-            // Continue with cached data
+          } else {
+            // No cached products, load fresh
+            products = await getProducts(false);
+            if (!Array.isArray(products) || products.length === 0) {
+              throw new Error('No products loaded');
+            }
+            
+            console.log(`Loaded ${products.length} fresh THCA products`);
+            loadFilterState();
+            await loadStrainData();
+            
+            toggleLoader(false);
+            filterProducts();
           }
-        } else {
-          // No cached products, load fresh
-          products = await getProducts(false);
-          if (!Array.isArray(products) || products.length === 0) {
-            throw new Error('No products loaded');
-          }
-          
-          console.log(`Loaded ${products.length} fresh THCA products`);
-          loadFilterState();
-          await loadStrainData();
-          
-          // Preload images with timeout and abort controller
-          try {
-            const filteredProducts = products.filter(() => true);
-            await Promise.race([
-              preloadImages(filteredProducts, imagePreloadAbortController.signal),
-              new Promise((_, reject) => {
-                setTimeout(() => reject(new Error('Image preload timeout')), 5000);
-              })
-            ]);
-          } catch (preloadError) {
-            console.warn('Image preload incomplete:', preloadError);
-            // Continue without complete preload
-          }
-          
-          toggleLoader(false);
-          filterProducts();
-        }
 
-        // Start the update checker
-        startProductUpdateChecker();
-        
-      } catch (error) {
-        console.error('Error in initialization:', error);
-        
-        if (retryCount < maxRetries) {
-          retryCount++;
-          console.log(`Retrying... Attempt ${retryCount} of ${maxRetries}`);
+          // Start the update checker
+          startProductUpdateChecker();
           
-          // Clear cache before retrying
-          localStorage.removeItem(CACHE_KEY);
-          localStorage.removeItem(CACHE_TIMESTAMP_KEY);
+          return true; // Success
+        } catch (error) {
+          console.error('Error in initialization:', error);
           
-          // Wait a bit before retrying
-          await new Promise(resolve => setTimeout(resolve, 1000));
-          return attemptLoad();
-        }
-        
-        const productGrid = document.getElementById('product-grid');
-        productGrid.innerHTML = `
-          <div style="text-align: center; padding: 20px;">
-            <p style="color: var(--status-error); margin-bottom: 15px;">
-              Error loading products. Please try refreshing the page.
-            </p>
-            <button onclick="window.location.reload()" style="
-              background-color: var(--accent-primary);
-              color: var(--bg-primary);
-              border: none;
-              padding: 10px 20px;
-              border-radius: 5px;
-              cursor: pointer;
+          if (error.message.includes('401')) {
+            statusManager.show('LitFarms website is currently in maintenance mode. Please try again later.', 'error');
+          } else {
+            statusManager.show('Unable to load products. Please try again later.', 'error');
+          }
+          
+          if (retryCount < maxRetries) {
+            retryCount++;
+            statusManager.update(`Retrying... Attempt ${retryCount} of ${maxRetries}`);
+            
+            // Clear cache before retrying
+            localStorage.removeItem(CACHE_KEY);
+            localStorage.removeItem(CACHE_TIMESTAMP_KEY);
+            
+            // Wait a bit before retrying
+            await new Promise(resolve => setTimeout(resolve, 2000));
+            return tryLoad();
+          }
+          
+          const productGrid = document.getElementById('product-grid');
+          productGrid.innerHTML = `
+            <div style="
+              text-align: center;
+              padding: 20px;
+              position: absolute;
+              top: 50%;
+              left: 50%;
+              transform: translate(-50%, -50%);
+              width: 100%;
+              max-width: 400px;
             ">
-              Refresh Page
-            </button>
-          </div>`;
-        toggleLoader(false);
+              <p style="
+                color: var(--status-error);
+                margin-bottom: 15px;
+                font-size: 16px;
+                line-height: 1.4;
+              ">
+                Unable to load products. The LitFarms website may be in maintenance mode.
+              </p>
+              <button onclick="window.location.reload()" style="
+                background-color: var(--accent-primary);
+                color: var(--bg-primary);
+                border: none;
+                padding: 10px 20px;
+                border-radius: 5px;
+                cursor: pointer;
+                font-size: 14px;
+                transition: opacity 0.2s;
+              ">
+                Refresh Page
+              </button>
+            </div>`;
+          toggleLoader(false);
+          return false;
+        }
       }
+
+      // Initial load attempt
+      return tryLoad();
     }
+
+    // Add retry button handler
+    document.getElementById('retry-button').addEventListener('click', async () => {
+      toggleLoader(true);
+      await attemptLoad();
+    });
 
     // Update preloadImages function to accept abort signal
     function preloadImages(products, signal) {
