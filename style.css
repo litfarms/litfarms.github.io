@@ -1624,7 +1624,11 @@
       top: 0;
       left: 0;
       right: 0;
-      padding: 8px 8px 15px 8px;
+      padding: 8px 5px 15px 5px;
+      margin-left: 0;
+      margin-right: 0;
+      padding-left: 5px;
+      padding-right: 5px;
       background: var(--bg-primary);
       z-index: 100;
       box-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
