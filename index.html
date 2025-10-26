@@ -23,14 +23,14 @@
 </head>
 <body>
   <!-- Cart and Settings buttons - placed early for immediate interactivity -->
-  <button id="settings-button" title="Notification Settings" onclick="openSettingsModal()">
+  <button id="settings-button" title="Notification Settings">
     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
       <path d="M12 15a3 3 0 100-6 3 3 0 000 6z" />
       <path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 010 2.83 2 2 0 01-2.83 0l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-2 2 2 2 0 01-2-2v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 01-2.83 0 2 2 0 010-2.83l.06-.06a1.65 1.65 0 00.33-1.82 1.65 1.65 0 00-1.51-1H3a2 2 0 01-2-2 2 2 0 012-2h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 010-2.83 2 2 0 012.83 0l.06.06a1.65 1.65 0 001.82.33H9a1.65 1.65 0 001-1.51V3a2 2 0 012-2 2 2 0 012 2v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 012.83 0 2 2 0 010 2.83l-.06.06a1.65 1.65 0 00-.33 1.82V9a1.65 1.65 0 001.51 1H21a2 2 0 012 2 2 2 0 01-2 2h-.09a1.65 1.65 0 00-1.51 1z" />
     </svg>
   </button>
 
-  <button id="virtual-cart-button" class="virtual-cart-button" title="View Cart" onclick="openCartModal()">
+  <button id="virtual-cart-button" class="virtual-cart-button" title="View Cart">
     <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
       <circle cx="9" cy="21" r="1"></circle>
       <circle cx="20" cy="21" r="1"></circle>
@@ -40,7 +40,7 @@
   </button>
 
   <script>
-    // Define functions immediately so onclick handlers work
+    // Define functions immediately
     window.openCartModal = function() {
       var modal = document.getElementById('cart-modal');
       if (modal) {
@@ -73,11 +73,30 @@
       }
     };
     
-    // Show buttons immediately after functions are defined
-    document.getElementById('settings-button').style.opacity = '1';
-    document.getElementById('settings-button').style.pointerEvents = 'auto';
-    document.getElementById('virtual-cart-button').style.opacity = '1';
-    document.getElementById('virtual-cart-button').style.pointerEvents = 'auto';
+    // Attach event listeners immediately
+    var settingsBtn = document.getElementById('settings-button');
+    var cartBtn = document.getElementById('virtual-cart-button');
+    
+    // Multiple event types for maximum compatibility
+    ['click', 'touchend'].forEach(function(eventType) {
+      settingsBtn.addEventListener(eventType, function(e) {
+        e.preventDefault();
+        e.stopPropagation();
+        window.openSettingsModal();
+      }, false);
+      
+      cartBtn.addEventListener(eventType, function(e) {
+        e.preventDefault();
+        e.stopPropagation();
+        window.openCartModal();
+      }, false);
+    });
+    
+    // Show buttons immediately after setup
+    settingsBtn.style.opacity = '1';
+    settingsBtn.style.pointerEvents = 'auto';
+    cartBtn.style.opacity = '1';
+    cartBtn.style.pointerEvents = 'auto';
   </script>
 
   <div id="site-status" class="site-status">
