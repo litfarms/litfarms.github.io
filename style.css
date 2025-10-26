@@ -1478,15 +1478,24 @@
   }
 
   .lightbox-close {
-    position: absolute;
-    top: 15px;
-    right: 35px;
+    position: fixed;
+    top: 20px;
+    right: 40px;
     color: #f1f1f1;
-    font-size: 40px;
+    font-size: 50px;
     font-weight: bold;
     transition: 0.3s;
     cursor: pointer;
     z-index: 2001;
+    line-height: 1;
+    padding: 0;
+    background: rgba(0, 0, 0, 0.5);
+    border-radius: 50%;
+    width: 50px;
+    height: 50px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
   }
 
   .lightbox-close:hover,
