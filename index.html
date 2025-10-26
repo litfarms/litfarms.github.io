@@ -617,9 +617,13 @@
       // Add click handler to open lightbox with original high-res image
       image.addEventListener('click', (e) => {
         e.stopPropagation(); // Prevent card click
-        // Pass the original image source for highest quality
-        const originalSrc = filteredImages[0].src;
-        openLightbox(originalSrc, product.title);
+        try {
+          // Pass the original image source for highest quality
+          const originalSrc = filteredImages[0].src;
+          openLightbox(originalSrc, product.title);
+        } catch (error) {
+          console.error('Error opening lightbox:', error);
+        }
       });
 
       // Add visual indicator that image is clickable
@@ -1668,12 +1672,17 @@ Using cached data from: ${new Date(parseInt(localStorage.getItem(CACHE_TIMESTAMP
       const lightboxImg = document.getElementById('lightbox-img');
       const lightboxCaption = document.getElementById('lightbox-caption');
       
+      if (!lightbox || !lightboxImg || !lightboxCaption) {
+        console.error('Lightbox elements not found');
+        return;
+      }
+      
       // Get higher resolution image by removing size parameters from Shopify URLs
       let highResImageSrc = imageSrc;
       
       // Shopify images often have size parameters like _300x300 or _small
       // Remove these to get the original high-res image
-      if (imageSrc.includes('cdn.shopify.com')) {
+      if (imageSrc && imageSrc.includes('cdn.shopify.com')) {
         // Remove size suffixes like _300x300, _small, _medium, _large, _compact, _grande
         highResImageSrc = imageSrc.replace(/_(pico|icon|thumb|small|compact|medium|large|grande|original|\d+x\d*|x\d+)(\.[a-z]+)/gi, '_2048x2048$2');
         // Or just get the master/original
@@ -1682,13 +1691,15 @@ Using cached data from: ${new Date(parseInt(localStorage.getItem(CACHE_TIMESTAMP
       
       lightbox.style.display = 'flex';
       lightboxImg.src = highResImageSrc;
-      lightboxCaption.textContent = caption;
+      lightboxCaption.textContent = caption || '';
       document.body.style.overflow = 'hidden'; // Prevent background scrolling
     }
 
     function closeLightbox() {
       const lightbox = document.getElementById('image-lightbox');
-      lightbox.style.display = 'none';
+      if (lightbox) {
+        lightbox.style.display = 'none';
+      }
       document.body.style.overflow = ''; // Restore scrolling
     }
 
@@ -1696,23 +1707,30 @@ Using cached data from: ${new Date(parseInt(localStorage.getItem(CACHE_TIMESTAMP
     document.addEventListener('DOMContentLoaded', async () => {
       toggleLoader(true);
 
-      // Lightbox event listeners
+      // Lightbox event listeners - with null checks
       const lightbox = document.getElementById('image-lightbox');
       const lightboxClose = document.querySelector('.lightbox-close');
       
-      lightboxClose.addEventListener('click', closeLightbox);
+      if (lightboxClose) {
+        lightboxClose.addEventListener('click', closeLightbox);
+      }
       
       // Close lightbox when clicking outside the image
-      lightbox.addEventListener('click', (e) => {
-        if (e.target === lightbox) {
-          closeLightbox();
-        }
-      });
+      if (lightbox) {
+        lightbox.addEventListener('click', (e) => {
+          if (e.target === lightbox) {
+            closeLightbox();
+          }
+        });
+      }
       
       // Close lightbox with Escape key
       document.addEventListener('keydown', (e) => {
-        if (e.key === 'Escape' && lightbox.style.display === 'flex') {
-          closeLightbox();
+        if (e.key === 'Escape') {
+          const lb = document.getElementById('image-lightbox');
+          if (lb && lb.style.display === 'flex') {
+            closeLightbox();
+          }
         }
       });
 
