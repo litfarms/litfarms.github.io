@@ -65,11 +65,12 @@
 
   .filters-container {
     position: sticky;
-    top: 0;
+    top: -1px; /* Slight negative to account for browser chrome */
     z-index: 100;
     padding: 10px 0;
     margin-bottom: 10px;
     backdrop-filter: blur(5px);
+    background: linear-gradient(to bottom, var(--bg-primary) 0%, rgba(26, 26, 26, 0.95) 50%, transparent 100%);
     -webkit-mask-image: linear-gradient(to bottom, 
       rgba(0, 0, 0, 1) 85%,
       rgba(0, 0, 0, 0)
@@ -616,9 +617,10 @@
     align-items: center;
     justify-content: center;
     padding: 0;
-    pointer-events: auto;
+    pointer-events: auto !important;
     touch-action: manipulation;
     -webkit-tap-highlight-color: transparent;
+    isolation: isolate; /* Create new stacking context */
   }
 
   #settings-button svg {
@@ -1143,9 +1145,10 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    pointer-events: auto;
+    pointer-events: auto !important;
     touch-action: manipulation;
     -webkit-tap-highlight-color: transparent;
+    isolation: isolate; /* Create new stacking context */
   }
 
   .virtual-cart-button:hover {
