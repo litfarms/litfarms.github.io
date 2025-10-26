@@ -1809,10 +1809,10 @@ Using cached data from: ${new Date(parseInt(localStorage.getItem(CACHE_TIMESTAMP
         filtersContainer.classList.toggle('collapsed');
         isFiltersManuallyToggled = true;
         
-        // Reset manual toggle flag after 3 seconds
+        // Reset manual toggle flag after 1.5 seconds
         setTimeout(() => {
           isFiltersManuallyToggled = false;
-        }, 3000);
+        }, 1500);
       });
 
       // Auto-collapse on scroll down (mobile only)
