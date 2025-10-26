@@ -718,7 +718,7 @@
   /* Add extra padding on mobile to avoid browser bottom bar */
   @media (max-width: 700px) {
     .modal-footer {
-      padding-bottom: 30px;
+      padding-bottom: 50px;
     }
   }
 
