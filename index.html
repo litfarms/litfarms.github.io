@@ -2675,60 +2675,38 @@ Using cached data from: ${new Date(parseInt(localStorage.getItem(CACHE_TIMESTAMP
       params.append('sca_ref', REFERRAL_PARAMS.sca_ref);
       params.append('sca_crp', REFERRAL_PARAMS.sca_crp);
 
-      // Safari iOS blocks window.open in setTimeout, so we need to open immediately
-      // and use a different approach for the redirect
+      // Build the cart URL with referral params
+      const cartUrl = 'https://litfarms.com/cart/' + cartItems + '?' + params.toString();
+      
+      // Safari iOS has strict popup blocking, so we need to open the window immediately
+      // We'll just go directly to the cart with params - Shopify should handle the tracking
       const isSafariIOS = /iPhone|iPad|iPod/.test(navigator.userAgent) && /Safari/.test(navigator.userAgent) && !/Chrome|CriOS|FxiOS/.test(navigator.userAgent);
       
       if (isSafariIOS) {
-        // For Safari iOS: Use a single redirect with a meta refresh fallback
-        // Create an intermediate page that will redirect after setting up tracking
-        const cartUrl = 'https://litfarms.com/cart/' + cartItems + '?' + params.toString();
-        const paramsString = params.toString();
-        const intermediateHtml = '<!DOCTYPE html>' +
-          '<html>' +
-          '<head>' +
-            '<title>Redirecting...</title>' +
-            '<meta http-equiv="refresh" content="2;url=' + cartUrl + '">' +
-            '<style>' +
-              'body { font-family: Arial, sans-serif; display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; background: #1a1a1a; color: #fff; }' +
-              '.loader { text-align: center; }' +
-              '.spinner { border: 4px solid #333; border-top: 4px solid #60a5fa; border-radius: 50%; width: 40px; height: 40px; animation: spin 1s linear infinite; margin: 0 auto 20px; }' +
-              '@keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }' +
-            '</style>' +
-          '</head>' +
-          '<body>' +
-            '<div class="loader">' +
-              '<div class="spinner"></div>' +
-              '<p>Setting up your order...</p>' +
-            '</div>' +
-            '<scr' + 'ipt>' +
-              'fetch("https://litfarms.com/?' + paramsString + '", { mode: "no-cors" })' +
-                '.then(function() {' +
-                  'setTimeout(function() {' +
-                    'window.location.href = "' + cartUrl + '";' +
-                  '}, 1500);' +
-                '})' +
-                '.catch(function() {' +
-                  'setTimeout(function() {' +
-                    'window.location.href = "' + cartUrl + '";' +
-                  '}, 1500);' +
-                '});' +
-            '<\/scr' + 'ipt>' +
-          '</body>' +
-          '</html>';
+        // For Safari iOS: Open window immediately to avoid popup blocking
+        // Then try to initialize tracking in the background
+        const newWindow = window.open(cartUrl, '_blank');
         
-        const blob = new Blob([intermediateHtml], { type: 'text/html' });
-        const blobUrl = URL.createObjectURL(blob);
-        window.open(blobUrl, '_blank');
+        // Try to load tracking in background using fetch (won't affect the opened window)
+        // This is best-effort - the URL params should still work
+        try {
+          fetch('https://litfarms.com/?' + params.toString(), { 
+            mode: 'no-cors',
+            credentials: 'include'
+          }).catch(() => {
+            // Silently fail - the URL params should still work
+          });
+        } catch (e) {
+          // Ignore errors
+        }
       } else {
-        // For other browsers: Use the original two-step approach
+        // For other browsers: Use the two-step approach for better tracking
         const homeUrl = 'https://litfarms.com/?' + params.toString();
         const newWindow = window.open(homeUrl, '_blank');
 
         // After a delay, redirect to the cart with items
         setTimeout(() => {
           if (newWindow && !newWindow.closed) {
-            const cartUrl = 'https://litfarms.com/cart/' + cartItems + '?' + params.toString();
             newWindow.location.href = cartUrl;
           }
         }, 1500);
