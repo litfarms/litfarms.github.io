@@ -1665,19 +1665,41 @@
       margin: 4px 0 !important;
     }
     
-    /* Adjust fixed buttons for mobile */
+    /* Adjust fixed buttons for mobile - larger touch targets */
     #settings-button {
       bottom: 20px;
       right: 15px;
-      width: 55px;
-      height: 55px;
+      width: 60px;
+      height: 60px;
+    }
+    
+    /* Add larger touch area with pseudo-element */
+    #settings-button::before {
+      content: '';
+      position: absolute;
+      top: -15px;
+      left: -15px;
+      right: -15px;
+      bottom: -15px;
+      border-radius: 50%;
     }
     
     .virtual-cart-button {
       bottom: 20px;
       left: 15px;
-      width: 55px;
-      height: 55px;
+      width: 60px;
+      height: 60px;
+    }
+    
+    /* Add larger touch area with pseudo-element */
+    .virtual-cart-button::before {
+      content: '';
+      position: absolute;
+      top: -15px;
+      left: -15px;
+      right: -15px;
+      bottom: -15px;
+      border-radius: 50%;
     }
     
     .lightbox {

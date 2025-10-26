@@ -1952,11 +1952,19 @@ Using cached data from: ${new Date(parseInt(localStorage.getItem(CACHE_TIMESTAMP
       const modal = document.getElementById('settings-modal');
       modal.style.display = 'flex';
       document.body.classList.add('modal-open');
+      // Prevent background scrolling
+      document.body.style.overflow = 'hidden';
+      document.body.style.position = 'fixed';
+      document.body.style.width = '100%';
     }
 
     function closeSettingsModal() {
       document.getElementById('settings-modal').style.display = 'none';
       document.body.classList.remove('modal-open');
+      // Restore scrolling
+      document.body.style.overflow = '';
+      document.body.style.position = '';
+      document.body.style.width = '';
     }
 
     function getSelectedValues(selectElement) {
@@ -2637,18 +2645,27 @@ Using cached data from: ${new Date(parseInt(localStorage.getItem(CACHE_TIMESTAMP
 
     // Cart Modal Functions
     function openCartModal() {
+      virtualCart.updateUI();
       document.getElementById('cart-modal').style.display = 'flex';
       document.body.classList.add('modal-open');
+      // Prevent background scrolling
+      document.body.style.overflow = 'hidden';
+      document.body.style.position = 'fixed';
+      document.body.style.width = '100%';
     }
 
     function closeCartModal() {
       document.getElementById('cart-modal').style.display = 'none';
       document.body.classList.remove('modal-open');
+      // Restore scrolling
+      document.body.style.overflow = '';
+      document.body.style.position = '';
+      document.body.style.width = '';
     }
 
     function checkout() {
       if (virtualCart.items.length === 0) return;
-
+      
       // Build a Shopify cart permalink
       const cartItems = virtualCart.items.map(item => 
         item.variantId + ':' + item.quantity
@@ -2658,18 +2675,64 @@ Using cached data from: ${new Date(parseInt(localStorage.getItem(CACHE_TIMESTAMP
       params.append('sca_ref', REFERRAL_PARAMS.sca_ref);
       params.append('sca_crp', REFERRAL_PARAMS.sca_crp);
 
-      // First, open homepage with referral params to initialize the tracking
-      const homeUrl = 'https://litfarms.com/?' + params.toString();
-      const newWindow = window.open(homeUrl, '_blank');
+      // Safari iOS blocks window.open in setTimeout, so we need to open immediately
+      // and use a different approach for the redirect
+      const isSafariIOS = /iPhone|iPad|iPod/.test(navigator.userAgent) && /Safari/.test(navigator.userAgent) && !/Chrome|CriOS|FxiOS/.test(navigator.userAgent);
+      
+      if (isSafariIOS) {
+        // For Safari iOS: Use a single redirect with a meta refresh fallback
+        // Create an intermediate page that will redirect after setting up tracking
+        const cartUrl = 'https://litfarms.com/cart/' + cartItems + '?' + params.toString();
+        const paramsString = params.toString();
+        const intermediateHtml = '<!DOCTYPE html>' +
+          '<html>' +
+          '<head>' +
+            '<title>Redirecting...</title>' +
+            '<meta http-equiv="refresh" content="2;url=' + cartUrl + '">' +
+            '<style>' +
+              'body { font-family: Arial, sans-serif; display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; background: #1a1a1a; color: #fff; }' +
+              '.loader { text-align: center; }' +
+              '.spinner { border: 4px solid #333; border-top: 4px solid #60a5fa; border-radius: 50%; width: 40px; height: 40px; animation: spin 1s linear infinite; margin: 0 auto 20px; }' +
+              '@keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }' +
+            '</style>' +
+          '</head>' +
+          '<body>' +
+            '<div class="loader">' +
+              '<div class="spinner"></div>' +
+              '<p>Setting up your order...</p>' +
+            '</div>' +
+            '<scr' + 'ipt>' +
+              'fetch("https://litfarms.com/?' + paramsString + '", { mode: "no-cors" })' +
+                '.then(function() {' +
+                  'setTimeout(function() {' +
+                    'window.location.href = "' + cartUrl + '";' +
+                  '}, 1500);' +
+                '})' +
+                '.catch(function() {' +
+                  'setTimeout(function() {' +
+                    'window.location.href = "' + cartUrl + '";' +
+                  '}, 1500);' +
+                '});' +
+            '<\/scr' + 'ipt>' +
+          '</body>' +
+          '</html>';
+        
+        const blob = new Blob([intermediateHtml], { type: 'text/html' });
+        const blobUrl = URL.createObjectURL(blob);
+        window.open(blobUrl, '_blank');
+      } else {
+        // For other browsers: Use the original two-step approach
+        const homeUrl = 'https://litfarms.com/?' + params.toString();
+        const newWindow = window.open(homeUrl, '_blank');
 
-      // After a delay, redirect to the cart with items
-      // This gives the referral tracking time to initialize
-      setTimeout(() => {
-        if (newWindow && !newWindow.closed) {
-          const cartUrl = 'https://litfarms.com/cart/' + cartItems + '?' + params.toString();
-          newWindow.location.href = cartUrl;
-        }
-      }, 1500);
+        // After a delay, redirect to the cart with items
+        setTimeout(() => {
+          if (newWindow && !newWindow.closed) {
+            const cartUrl = 'https://litfarms.com/cart/' + cartItems + '?' + params.toString();
+            newWindow.location.href = cartUrl;
+          }
+        }, 1500);
+      }
 
       // Clear the virtual cart
       virtualCart.clearCart();
