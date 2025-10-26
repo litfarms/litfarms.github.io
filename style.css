@@ -1018,6 +1018,9 @@
     min-width: 200px;
     font-size: 14px;
     transition: all 0.2s ease;
+    width: -webkit-fill-available;
+    width: -moz-available;
+    width: fill-available;
   }
 
   .search-input:focus {
