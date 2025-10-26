@@ -913,6 +913,65 @@
     border-left: 3px solid var(--accent-primary);
     padding-left: 7px; /* Compensate for the border */
   }
+  
+  /* Filter chips for mobile */
+  .filter-chips {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-bottom: 15px;
+  }
+  
+  .filter-chip {
+    display: inline-block;
+    cursor: pointer;
+    user-select: none;
+  }
+  
+  .filter-chip input[type="checkbox"] {
+    display: none;
+  }
+  
+  .filter-chip span {
+    display: inline-block;
+    padding: 8px 16px;
+    background: var(--bg-secondary);
+    border: 2px solid var(--border-glow);
+    border-radius: 20px;
+    color: var(--text-secondary);
+    font-size: 14px;
+    transition: all 0.2s ease;
+  }
+  
+  .filter-chip input[type="checkbox"]:checked + span {
+    background: var(--accent-primary);
+    border-color: var(--accent-primary);
+    color: var(--bg-primary);
+    font-weight: bold;
+  }
+  
+  .filter-chip:hover span {
+    border-color: var(--accent-secondary);
+  }
+  
+  /* Desktop/Mobile visibility */
+  .desktop-only {
+    display: block;
+  }
+  
+  .mobile-only {
+    display: none;
+  }
+  
+  @media (max-width: 700px) {
+    .desktop-only {
+      display: none !important;
+    }
+    
+    .mobile-only {
+      display: block !important;
+    }
+  }
 
   .notification-input {
     box-sizing: border-box;
