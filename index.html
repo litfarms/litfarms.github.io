@@ -49,7 +49,16 @@
     </a>
   </div>
   <div class="filters-container">
-    <div class="filters">
+    <button id="filters-toggle" class="filters-toggle" aria-label="Toggle filters">
+      <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"></polygon>
+      </svg>
+      <span class="filters-toggle-text">Filters</span>
+      <svg class="filters-toggle-arrow" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <polyline points="6 9 12 15 18 9"></polyline>
+      </svg>
+    </button>
+    <div class="filters" id="filters">
       <div class="search-container">
         <input type="text" id="product-search-filter" class="search-input" placeholder="Search products...">
         <button id="clear-search" class="clear-search">&times;</button>
@@ -1703,9 +1712,57 @@ Using cached data from: ${new Date(parseInt(localStorage.getItem(CACHE_TIMESTAMP
       document.body.style.overflow = ''; // Restore scrolling
     }
 
+    // Filters toggle functionality
+    let lastScrollY = 0;
+    let isFiltersManuallyToggled = false;
+
+    function setupFiltersToggle() {
+      const filtersToggle = document.getElementById('filters-toggle');
+      const filtersContainer = document.querySelector('.filters-container');
+      
+      if (!filtersToggle) return;
+
+      // Toggle on button click
+      filtersToggle.addEventListener('click', () => {
+        filtersContainer.classList.toggle('collapsed');
+        isFiltersManuallyToggled = true;
+        
+        // Reset manual toggle flag after 3 seconds
+        setTimeout(() => {
+          isFiltersManuallyToggled = false;
+        }, 3000);
+      });
+
+      // Auto-collapse on scroll down (mobile only)
+      let scrollTimeout;
+      window.addEventListener('scroll', () => {
+        // Only auto-collapse on mobile
+        if (window.innerWidth > 700) return;
+        if (isFiltersManuallyToggled) return;
+
+        clearTimeout(scrollTimeout);
+        
+        const currentScrollY = window.scrollY;
+        
+        // Collapse when scrolling down past 100px
+        if (currentScrollY > 100 && currentScrollY > lastScrollY) {
+          filtersContainer.classList.add('collapsed');
+        }
+        // Expand when scrolling back to top
+        else if (currentScrollY < 50) {
+          filtersContainer.classList.remove('collapsed');
+        }
+        
+        lastScrollY = currentScrollY;
+      });
+    }
+
     // Document ready event listener
     document.addEventListener('DOMContentLoaded', async () => {
       toggleLoader(true);
+
+      // Setup filters toggle
+      setupFiltersToggle();
 
       // Lightbox event listeners - with null checks
       const lightbox = document.getElementById('image-lightbox');

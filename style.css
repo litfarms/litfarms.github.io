@@ -82,6 +82,37 @@
       rgba(0, 0, 0, 1) 85%, 
       rgba(0, 0, 0, 0)
     );
+    transition: all 0.3s ease;
+  }
+
+  .filters-toggle {
+    display: none; /* Hidden by default, shown on mobile */
+    width: 100%;
+    padding: 10px;
+    background: var(--bg-secondary);
+    border: 1px solid var(--accent-primary);
+    border-radius: 5px;
+    color: var(--text-primary);
+    cursor: pointer;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    font-size: 14px;
+    font-weight: 500;
+    transition: all 0.3s ease;
+    margin-bottom: 8px;
+  }
+
+  .filters-toggle:hover {
+    background: var(--bg-elevated);
+  }
+
+  .filters-toggle-arrow {
+    transition: transform 0.3s ease;
+  }
+
+  .filters-container.collapsed .filters-toggle-arrow {
+    transform: rotate(-180deg);
   }
 
   .filters {
@@ -89,6 +120,15 @@
     flex-wrap: wrap;
     gap: 10px;
     justify-content: center;
+    transition: all 0.3s ease;
+    overflow: hidden;
+  }
+
+  .filters-container.collapsed .filters {
+    max-height: 0;
+    opacity: 0;
+    margin: 0;
+    padding: 0;
   }
 
   .filters select, .filters button {
@@ -1546,6 +1586,53 @@
 
   /* Mobile responsive */
   @media (max-width: 700px) {
+    /* Compact filters for mobile */
+    .filters-container {
+      padding: 8px 8px 15px 8px;
+    }
+    
+    .filters-toggle {
+      display: flex; /* Show toggle button on mobile */
+    }
+    
+    .filters {
+      gap: 6px;
+      padding: 0;
+    }
+    
+    .filters select, .filters button {
+      padding: 8px 10px;
+      font-size: 13px;
+      min-width: auto;
+      flex: 1 1 auto;
+    }
+    
+    /* Make search take full width on mobile */
+    .search-container {
+      width: 100%;
+      order: -1; /* Put search first */
+    }
+    
+    /* Stack filters in rows of 2 */
+    #strain-filter,
+    #strain-type-filter {
+      flex: 1 1 calc(50% - 3px);
+    }
+    
+    #weight-filter,
+    #sort-filter {
+      flex: 1 1 calc(50% - 3px);
+    }
+    
+    #stock-filter {
+      width: 100%;
+    }
+    
+    #product-count {
+      font-size: 13px;
+      margin: 4px 0 !important;
+    }
+    
     /* Move fixed buttons higher on mobile to avoid product overlap */
     #settings-button {
       bottom: 30px;
