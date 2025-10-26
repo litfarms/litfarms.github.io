@@ -746,10 +746,12 @@
   }
 
   .settings-section {
-    margin-bottom: 15px;
-    padding: 15px;
+    margin-bottom: 20px;
+    padding: 20px;
     background-color: var(--bg-elevated);
     border-radius: 8px;
+    border: 1px solid rgba(96, 165, 250, 0.15);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
   }
 
   .settings-section:last-child {
@@ -757,9 +759,13 @@
   }
 
   .settings-section h3 {
-    color: var(--accent-secondary);
+    color: var(--accent-primary);
     margin-top: 0;
     margin-bottom: 15px;
+    font-size: 1.1em;
+    font-weight: 600;
+    padding-bottom: 10px;
+    border-bottom: 2px solid var(--border-glow);
   }
 
   .settings-select {
