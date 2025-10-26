@@ -1719,12 +1719,27 @@ Using cached data from: ${new Date(parseInt(localStorage.getItem(CACHE_TIMESTAMP
     function setupFiltersToggle() {
       const filtersToggle = document.getElementById('filters-toggle');
       const filtersContainer = document.querySelector('.filters-container');
+      const productGrid = document.querySelector('.product-grid');
       
       if (!filtersToggle) return;
+
+      // Function to update grid margin
+      function updateGridMargin() {
+        if (window.innerWidth <= 700) {
+          if (filtersContainer.classList.contains('collapsed')) {
+            productGrid.style.marginTop = '80px';
+          } else {
+            productGrid.style.marginTop = '200px';
+          }
+        } else {
+          productGrid.style.marginTop = '';
+        }
+      }
 
       // Toggle on button click
       filtersToggle.addEventListener('click', () => {
         filtersContainer.classList.toggle('collapsed');
+        updateGridMargin();
         isFiltersManuallyToggled = true;
         
         // Reset manual toggle flag after 3 seconds
@@ -1747,14 +1762,22 @@ Using cached data from: ${new Date(parseInt(localStorage.getItem(CACHE_TIMESTAMP
         // Collapse when scrolling down past 100px
         if (currentScrollY > 100 && currentScrollY > lastScrollY) {
           filtersContainer.classList.add('collapsed');
+          updateGridMargin();
         }
         // Expand when scrolling back to top
         else if (currentScrollY < 50) {
           filtersContainer.classList.remove('collapsed');
+          updateGridMargin();
         }
         
         lastScrollY = currentScrollY;
       });
+
+      // Update margin on window resize
+      window.addEventListener('resize', updateGridMargin);
+      
+      // Initial margin setup
+      updateGridMargin();
     }
 
     // Document ready event listener
@@ -2844,7 +2867,8 @@ Using cached data from: ${new Date(parseInt(localStorage.getItem(CACHE_TIMESTAMP
         <button class="close-modal">&times;</button>
       </div>
       
-      <div class="settings-section">
+      <div class="modal-content">
+        <div class="settings-section">
         <h3>Update Frequency</h3>
         <div class="settings-input-group">
           <input type="number" id="check-interval" class="settings-input" min="1" value="5" placeholder="5">
@@ -2966,8 +2990,11 @@ Using cached data from: ${new Date(parseInt(localStorage.getItem(CACHE_TIMESTAMP
           <!-- Product checkboxes will be dynamically added here -->
         </div>
       </div>
+      </div>
 
-      <button class="save-settings">Save Settings</button>
+      <div class="modal-footer">
+        <button class="save-settings">Save Settings</button>
+      </div>
     </div>
   </div>
 
