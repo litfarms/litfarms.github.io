@@ -1832,11 +1832,11 @@ Using cached data from: ${new Date(parseInt(localStorage.getItem(CACHE_TIMESTAMP
       // Prevent touch events from passing through
       settingsButton.addEventListener('touchstart', (e) => {
         e.stopPropagation();
-      }, true);
+      }, { capture: true, passive: true });
       
       settingsButton.addEventListener('touchend', (e) => {
         e.stopPropagation();
-      }, true);
+      }, { capture: true, passive: true });
       document.querySelector('.close-modal').addEventListener('click', closeSettingsModal);
       document.querySelector('.save-settings').addEventListener('click', saveSettingsFromForm);
 
@@ -2717,11 +2717,11 @@ Using cached data from: ${new Date(parseInt(localStorage.getItem(CACHE_TIMESTAMP
       // Prevent any touch events from passing through
       cartButton.addEventListener('touchstart', (e) => {
         e.stopPropagation();
-      }, true);
+      }, { capture: true, passive: true });
       
       cartButton.addEventListener('touchend', (e) => {
         e.stopPropagation();
-      }, true);
+      }, { capture: true, passive: true });
 
       // Track mousedown position for cart modal
       let cartModalMouseDown = false;
