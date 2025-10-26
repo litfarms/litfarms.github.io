@@ -39,6 +39,41 @@
     <span class="cart-count">0</span>
   </button>
 
+  <script>
+    // Define functions immediately so onclick handlers work
+    window.openCartModal = function() {
+      var modal = document.getElementById('cart-modal');
+      if (modal) {
+        modal.style.display = 'flex';
+        document.body.classList.add('modal-open');
+      }
+    };
+    
+    window.closeCartModal = function() {
+      var modal = document.getElementById('cart-modal');
+      if (modal) {
+        modal.style.display = 'none';
+        document.body.classList.remove('modal-open');
+      }
+    };
+    
+    window.openSettingsModal = function() {
+      var modal = document.getElementById('settings-modal');
+      if (modal) {
+        modal.style.display = 'flex';
+        document.body.classList.add('modal-open');
+      }
+    };
+    
+    window.closeSettingsModal = function() {
+      var modal = document.getElementById('settings-modal');
+      if (modal) {
+        modal.style.display = 'none';
+        document.body.classList.remove('modal-open');
+      }
+    };
+  </script>
+
   <div id="site-status" class="site-status">
     <span id="status-message"></span>
     <button id="retry-button" class="retry-button" style="display: none;">Retry Now</button>
