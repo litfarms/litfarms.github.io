@@ -2267,6 +2267,35 @@ Using cached data from: ${new Date(parseInt(localStorage.getItem(CACHE_TIMESTAMP
     const ADJECTIVES = ['swift', 'bright', 'cosmic', 'mystic', 'golden', 'silver', 'crystal', 'azure', 'crimson', 'emerald'];
     const NOUNS = ['phoenix', 'dragon', 'falcon', 'tiger', 'wolf', 'eagle', 'lion', 'hawk', 'panther', 'bear'];
     
+    // Force refresh function - clears cache and reloads
+    function forceRefresh() {
+      // Clear all caches if available
+      if ('caches' in window) {
+        caches.keys().then(function(names) {
+          for (let name of names) {
+            caches.delete(name);
+          }
+        });
+      }
+      
+      // Clear service worker if registered
+      if ('serviceWorker' in navigator) {
+        navigator.serviceWorker.getRegistrations().then(function(registrations) {
+          for (let registration of registrations) {
+            registration.unregister();
+          }
+        });
+      }
+      
+      // Add timestamp to URL to force reload
+      const url = new URL(window.location.href);
+      url.searchParams.set('_refresh', Date.now());
+      
+      // Hard reload with cache bypass
+      window.location.href = url.href;
+      window.location.reload(true);
+    }
+
     // Random topic name generator
     function generateRandomTopic() {
       // Get random elements from arrays
@@ -3004,6 +3033,16 @@ Using cached data from: ${new Date(parseInt(localStorage.getItem(CACHE_TIMESTAMP
         <div class="product-select-container" id="product-select">
           <!-- Product checkboxes will be dynamically added here -->
         </div>
+      </div>
+      
+      <div class="settings-section">
+        <h3>App Management</h3>
+        <button id="force-refresh-btn" onclick="forceRefresh()" style="background-color: var(--accent-secondary); color: var(--bg-primary); border: none; padding: 10px 20px; border-radius: 5px; cursor: pointer; width: 100%; font-weight: bold;">
+          🔄 Force Refresh App
+        </button>
+        <small style="color: var(--text-muted); display: block; margin-top: 8px;">
+          Clear cache and reload the latest version. Use this if you don't see recent updates.
+        </small>
       </div>
       </div>
 
