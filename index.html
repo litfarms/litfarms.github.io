@@ -128,7 +128,7 @@
     <button id="retry-button" class="retry-button" style="display: none;">Retry Now</button>
   </div>
   <div class="header">
-    <a href="https://www.litfarms.com" class="header-link">
+    <a href="https://www.litfarms.com?sca_ref=9871506.3QN5sUKgOM&sca_crp=MjMzMjUw" class="header-link">
       <svg width="75" height="75" viewBox="0 0 117.04084 64.042396" version="1.1" id="svg1" xml:space="preserve" xmlns="http://www.w3.org/2000/svg">
         <defs id="defs1"></defs>
         <g id="layer1" transform="translate(-46.479583,-116.4788)">
@@ -145,7 +145,7 @@
         </g>
       </svg>
     </a>
-    <a href="https://www.litfarms.com" class="header-link">
+    <a href="https://www.litfarms.com?sca_ref=9871506.3QN5sUKgOM&sca_crp=MjMzMjUw" class="header-link">
       <h1>Farms Products</h1>
     </a>
   </div>
@@ -631,8 +631,53 @@
             const productTitle = createProductTitle(product);
             productCard.appendChild(productTitle);
 
-            const priceContainer = createPriceContainer(product, relevantVariants, domElements.strainFilter.value, domElements.weightFilter.value, domElements.stockFilter.classList.contains('active'));
+            const priceContainer = createPriceContainer(product, relevantVariants, domElements.strainFilter.value, domElements.weightFilter.value, domElements.stockFilter.classList.contains('active'), productCard);
             productCard.appendChild(priceContainer);
+
+            // Set initial image to first tier if multiple tiers exist
+            const processedVariantsForImage = utils.processVariants(product);
+            const variantsByTierForImage = {};
+            TIERS.forEach(tier => {
+              variantsByTierForImage[tier] = [];
+            });
+            processedVariantsForImage.forEach(variant => {
+              if (variant.correctedTier && variant.correctedWeight) {
+                variantsByTierForImage[variant.correctedTier].push(variant);
+              }
+            });
+            
+            // Find first available tier with variants
+            const firstTierWithVariants = TIERS.find(tier => {
+              const tierVariants = variantsByTierForImage[tier];
+              if (!tierVariants || tierVariants.length === 0) return false;
+              
+              const filtered = tierVariants.filter(v => {
+                if (domElements.strainFilter.value !== 'all' && v.correctedTier !== domElements.strainFilter.value) return false;
+                if (domElements.weightFilter.value !== 'all' && v.correctedWeight !== domElements.weightFilter.value) return false;
+                if (!domElements.stockFilter.classList.contains('active') && !v.available) return false;
+                return true;
+              });
+              return filtered.length > 0;
+            });
+            
+            // Update image to first tier's image if multiple tiers exist
+            if (firstTierWithVariants && variantsByTierForImage[firstTierWithVariants]) {
+              const availableTiersCount = TIERS.filter(tier => {
+                const tierVariants = variantsByTierForImage[tier];
+                if (!tierVariants || tierVariants.length === 0) return false;
+                const filtered = tierVariants.filter(v => {
+                  if (domElements.strainFilter.value !== 'all' && v.correctedTier !== domElements.strainFilter.value) return false;
+                  if (domElements.weightFilter.value !== 'all' && v.correctedWeight !== domElements.weightFilter.value) return false;
+                  if (!domElements.stockFilter.classList.contains('active') && !v.available) return false;
+                  return true;
+                });
+                return filtered.length > 0;
+              }).length;
+              
+              if (availableTiersCount > 1) {
+                updateProductImage(productCard, product, variantsByTierForImage[firstTierWithVariants], true);
+              }
+            }
 
             const productDescription = createProductDescription(product);
             productCard.appendChild(productDescription);
@@ -853,8 +898,15 @@
     }
 
     function createProductDescription(product) {
-      const description = document.createElement('p');
-      description.className = 'product-description';
+      const container = document.createElement('div');
+      container.className = 'product-description-container';
+      
+      const toggleButton = document.createElement('button');
+      toggleButton.className = 'description-toggle';
+      toggleButton.innerHTML = '<span>Show Info</span><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"></polyline></svg>';
+      
+      const description = document.createElement('div');
+      description.className = 'product-description collapsed';
       
       if (product.body_html) {
         const temp = document.createElement('div');
@@ -893,22 +945,73 @@
           
         if (plainText.length > 10) {
           description.innerHTML = temp.innerHTML;
-          return description;
+        } else {
+          // Fall back to manual strain description
+          const cleanStrainName = product.title
+            .replace(/\s*-?\s*THCA\s+Flower\s*$/i, '')
+            .replace(/\s*-?\s*Flower\s*$/i, '')
+            .replace(/\s*-?\s*\d+\.?\d*g\s*$/i, '')
+            .replace(/-/g, '')
+            .trim()
+            .toLowerCase();
+
+          const leaflyData = strainData[cleanStrainName];
+          description.innerHTML = leaflyData?.description || 'No description available.';
         }
+      } else {
+        // Only fall back to manual strain description if no product description
+        const cleanStrainName = product.title
+          .replace(/\s*-?\s*THCA\s+Flower\s*$/i, '')
+          .replace(/\s*-?\s*Flower\s*$/i, '')
+          .replace(/\s*-?\s*\d+\.?\d*g\s*$/i, '')
+          .replace(/-/g, '')
+          .trim()
+          .toLowerCase();
+
+        const leaflyData = strainData[cleanStrainName];
+        description.innerHTML = leaflyData?.description || 'No description available.';
       }
       
-      // Only fall back to manual strain description if no product description
-      const cleanStrainName = product.title
-        .replace(/\s*-?\s*THCA\s+Flower\s*$/i, '')
-        .replace(/\s*-?\s*Flower\s*$/i, '')
-        .replace(/\s*-?\s*\d+\.?\d*g\s*$/i, '')
-        .replace(/-/g, '')
-        .trim()
-        .toLowerCase();
-
-      const leaflyData = strainData[cleanStrainName];
-      description.innerHTML = leaflyData?.description || 'No description available.';
-      return description;
+      // Toggle functionality - expand all cards in the same row
+      toggleButton.addEventListener('click', (e) => {
+        e.stopPropagation();
+        
+        const productCard = container.closest('.product-card');
+        const allCards = Array.from(document.querySelectorAll('.product-card'));
+        const cardIndex = allCards.indexOf(productCard);
+        
+        // Calculate which row this card is in (based on grid columns)
+        const gridComputedStyle = window.getComputedStyle(document.querySelector('.product-grid'));
+        const gridColumns = gridComputedStyle.getPropertyValue('grid-template-columns').split(' ').length;
+        const rowIndex = Math.floor(cardIndex / gridColumns);
+        
+        // Get all cards in the same row
+        const rowStartIndex = rowIndex * gridColumns;
+        const rowEndIndex = rowStartIndex + gridColumns;
+        const cardsInRow = allCards.slice(rowStartIndex, rowEndIndex);
+        
+        // Toggle all descriptions in the row
+        const isCurrentlyCollapsed = description.classList.contains('collapsed');
+        cardsInRow.forEach(card => {
+          const desc = card.querySelector('.product-description');
+          const btn = card.querySelector('.description-toggle');
+          if (desc && btn) {
+            if (isCurrentlyCollapsed) {
+              desc.classList.remove('collapsed');
+              btn.querySelector('span').textContent = 'Hide Info';
+              btn.classList.add('expanded');
+            } else {
+              desc.classList.add('collapsed');
+              btn.querySelector('span').textContent = 'Show Info';
+              btn.classList.remove('expanded');
+            }
+          }
+        });
+      });
+      
+      container.appendChild(toggleButton);
+      container.appendChild(description);
+      return container;
     }
 
     // Update filter function
@@ -2056,6 +2159,36 @@ Using cached data from: ${new Date(parseInt(localStorage.getItem(CACHE_TIMESTAMP
       const modal = document.getElementById('settings-modal');
       modal.style.display = 'flex';
       document.body.classList.add('modal-open');
+      
+      // Check if content is scrollable and show indicator
+      setTimeout(() => checkScrollIndicator(modal), 100);
+    }
+    
+    // Function to check if modal content is scrollable
+    function checkScrollIndicator(modal) {
+      const modalContent = modal.querySelector('.modal-content');
+      const modalFooter = modal.querySelector('.modal-footer');
+      
+      if (modalContent && modalFooter) {
+        const isScrollable = modalContent.scrollHeight > modalContent.clientHeight;
+        
+        if (isScrollable) {
+          modalFooter.classList.add('show-scroll-indicator');
+        } else {
+          modalFooter.classList.remove('show-scroll-indicator');
+        }
+        
+        // Update indicator on scroll
+        modalContent.addEventListener('scroll', function() {
+          const isAtBottom = modalContent.scrollHeight - modalContent.scrollTop <= modalContent.clientHeight + 10;
+          
+          if (isAtBottom) {
+            modalFooter.classList.remove('show-scroll-indicator');
+          } else if (isScrollable) {
+            modalFooter.classList.add('show-scroll-indicator');
+          }
+        });
+      }
     }
 
     function closeSettingsModal() {
@@ -2841,8 +2974,12 @@ Using cached data from: ${new Date(parseInt(localStorage.getItem(CACHE_TIMESTAMP
     // Cart Modal Functions - defined globally for onclick handlers
     window.openCartModal = function() {
       virtualCart.updateUI();
-      document.getElementById('cart-modal').style.display = 'flex';
+      const modal = document.getElementById('cart-modal');
+      modal.style.display = 'flex';
       document.body.classList.add('modal-open');
+      
+      // Check if content is scrollable and show indicator
+      setTimeout(() => checkScrollIndicator(modal), 100);
     }
 
     window.closeCartModal = function() {
@@ -2948,8 +3085,40 @@ Using cached data from: ${new Date(parseInt(localStorage.getItem(CACHE_TIMESTAMP
       });
     });
 
-    // Update createPriceContainer to add "Add to Cart" buttons
-    function createPriceContainer(product, variants, strainFilter, weightFilter, stockFilter) {
+    // Helper function to update product image based on tier variants
+    function updateProductImage(productCard, product, tierVariants, skipTransition = false) {
+      const imageElement = productCard.querySelector('.product-image');
+      if (!imageElement || !product.images || product.images.length === 0) return;
+
+      // Get variant IDs for this tier
+      const tierVariantIds = new Set(tierVariants.map(v => v.id));
+      
+      // Find image that matches any variant in this tier
+      const tierImage = product.images.find(img => 
+        img.variant_ids && 
+        img.variant_ids.some(id => tierVariantIds.has(id))
+      );
+      
+      // Update image
+      if (tierImage && tierImage.src !== imageElement.src) {
+        if (skipTransition) {
+          // Immediate update without transition (for initial load)
+          imageElement.src = tierImage.src;
+        } else {
+          // Smooth transition for user interactions
+          imageElement.style.opacity = '0.5';
+          imageElement.style.transition = 'opacity 0.2s ease';
+          
+          setTimeout(() => {
+            imageElement.src = tierImage.src;
+            imageElement.style.opacity = '1';
+          }, 200);
+        }
+      }
+    }
+
+    // Update createPriceContainer to add "Add to Cart" buttons with tabs
+    function createPriceContainer(product, variants, strainFilter, weightFilter, stockFilter, productCard) {
       const container = document.createElement('div');
       container.className = 'price-container';
 
@@ -2965,88 +3134,166 @@ Using cached data from: ${new Date(parseInt(localStorage.getItem(CACHE_TIMESTAMP
         }
       });
 
-      // Create sections for each tier
-      TIERS.forEach(tier => {
+      // Filter tiers based on filters
+      const availableTiers = TIERS.filter(tier => {
         if (strainFilter !== 'all' && tier !== strainFilter) {
-          return;
+          return false;
         }
 
         const tierVariants = variantsByTier[tier];
-        if (tierVariants && tierVariants.length > 0) {
-          const filteredVariants = tierVariants.filter(variant => {
-            if (weightFilter !== 'all' && variant.correctedWeight !== weightFilter) {
-              return false;
+        if (!tierVariants || tierVariants.length === 0) {
+          return false;
+        }
+
+        const filteredVariants = tierVariants.filter(variant => {
+          if (weightFilter !== 'all' && variant.correctedWeight !== weightFilter) {
+            return false;
+          }
+          if (!stockFilter && !variant.available) {
+            return false;
+          }
+          return true;
+        });
+
+        return filteredVariants.length > 0;
+      });
+
+      // If multiple tiers, create tabs
+      if (availableTiers.length > 1) {
+        const tabsContainer = document.createElement('div');
+        tabsContainer.className = 'variant-tabs-container';
+
+        const tabs = document.createElement('div');
+        tabs.className = 'variant-tabs';
+
+        // Create tab buttons
+        availableTiers.forEach((tier, index) => {
+          const tab = document.createElement('button');
+          tab.className = `variant-tab tab-${tier.toLowerCase()}`;
+          if (index === 0) tab.classList.add('active');
+          tab.dataset.tier = tier;
+
+          // Add icon based on tier
+          const icon = document.createElement('span');
+          icon.className = 'variant-tab-icon';
+          if (tier === 'Essential') {
+            icon.innerHTML = '<svg width="18" height="18" viewBox="-351 153 256 256" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M-177.7,334.5c6.3-2.3,12.6-5.2,19.8-8.6c31.9-16.4,51.7-41.7,51.7-41.7s-32.5,0.6-64.4,17c-4,1.7-7.5,4-10.9,5.7c5.7-7.5,12.1-16.4,18.7-25c25-37.1,31.3-77.3,31.3-77.3s-34.8,21-59.2,58.6c-5.2,7.5-9.8,14.9-13.8,22.7c1.1-10.3,1.1-22.1,1.1-33.6c0-50-19.8-91.1-19.8-91.1s-19.8,40.5-19.8,91.1c0,12.1,0.6,23.3,1.1,33.6c-4-7.5-8.6-14.9-13.8-22.7c-25-37.1-59.2-58.6-59.2-58.6s6.3,40,31.3,77.3c6.3,9.2,12.1,17.5,18.7,25c-3.4-2.3-7.5-4-10.9-5.7c-31.9-16.4-64.4-17-64.4-17s19.8,25.6,51.7,41.7c6.9,3.4,13.2,6.3,19.8,8.6c-4,0.6-8,1.1-12.1,2.3c-30.5,6.4-53.2,23.9-53.2,23.9s27.3,7.5,58.6,1.1c9.8-2.3,19.8-4.6,27.3-7.5c-1.1,1.1,15.8-8.6,21.6-14.4v60.4h8.6v-61.8c6.3,6.3,22.7,16.4,22.1,14.9c8,2.9,17.5,5.2,27.3,7.5c30.8,6.3,58.6-1.1,58.6-1.1s-22.1-17.5-53.4-23.8C-169.6,335.7-173.7,335.1-177.7,334.5z" fill="currentColor"/></svg>';
+          } else if (tier === 'Preferred') {
+            icon.innerHTML = '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M9.15316 5.40838C10.4198 3.13613 11.0531 2 12 2C12.9469 2 13.5802 3.13612 14.8468 5.40837L15.1745 5.99623C15.5345 6.64193 15.7144 6.96479 15.9951 7.17781C16.2757 7.39083 16.6251 7.4699 17.3241 7.62805L17.9605 7.77203C20.4201 8.32856 21.65 8.60682 21.9426 9.54773C22.2352 10.4886 21.3968 11.4691 19.7199 13.4299L19.2861 13.9372C18.8096 14.4944 18.5713 14.773 18.4641 15.1177C18.357 15.4624 18.393 15.8341 18.465 16.5776L18.5306 17.2544C18.7841 19.8706 18.9109 21.1787 18.1449 21.7602C17.3788 22.3417 16.2273 21.8115 13.9243 20.7512L13.3285 20.4768C12.6741 20.1755 12.3469 20.0248 12 20.0248C11.6531 20.0248 11.3259 20.1755 10.6715 20.4768L10.0757 20.7512C7.77268 21.8115 6.62118 22.3417 5.85515 21.7602C5.08912 21.1787 5.21588 19.8706 5.4694 17.2544L5.53498 16.5776C5.60703 15.8341 5.64305 15.4624 5.53586 15.1177C5.42868 14.773 5.19043 14.4944 4.71392 13.9372L4.2801 13.4299C2.60325 11.4691 1.76482 10.4886 2.05742 9.54773C2.35002 8.60682 3.57986 8.32856 6.03954 7.77203L6.67589 7.62805C7.37485 7.4699 7.72433 7.39083 8.00494 7.17781C8.28555 6.96479 8.46553 6.64194 8.82547 5.99623L9.15316 5.40838Z" fill="currentColor"/></svg>';
+          } else if (tier === 'Supreme') {
+            icon.innerHTML = '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M21.609 13.5616L21.8382 11.1263C22.0182 9.2137 22.1082 8.25739 21.781 7.86207C21.604 7.64823 21.3633 7.5172 21.106 7.4946C20.6303 7.45282 20.0329 8.1329 18.8381 9.49307C18.2202 10.1965 17.9113 10.5482 17.5666 10.6027C17.3757 10.6328 17.1811 10.6018 17.0047 10.5131C16.6865 10.3529 16.4743 9.91812 16.0499 9.04851L13.8131 4.46485C13.0112 2.82162 12.6102 2 12 2C11.3898 2 10.9888 2.82162 10.1869 4.46486L7.95007 9.04852C7.5257 9.91812 7.31351 10.3529 6.99526 10.5131C6.81892 10.6018 6.62434 10.6328 6.43337 10.6027C6.08872 10.5482 5.77977 10.1965 5.16187 9.49307C3.96708 8.1329 3.36968 7.45282 2.89399 7.4946C2.63666 7.5172 2.39598 7.64823 2.21899 7.86207C1.8918 8.25739 1.9818 9.2137 2.16181 11.1263L2.391 13.5616C2.76865 17.5742 2.95748 19.5805 4.14009 20.7902C5.32271 22 7.09517 22 10.6401 22H13.3599C16.9048 22 18.6773 22 19.8599 20.7902C21.0425 19.5805 21.2313 17.5742 21.609 13.5616Z" fill="currentColor"/></svg>';
+          }
+          tab.appendChild(icon);
+
+          const text = document.createElement('span');
+          text.textContent = tier;
+          tab.appendChild(text);
+
+          tab.addEventListener('click', (e) => {
+            e.stopPropagation();
+            // Remove active class from all tabs and sections
+            tabs.querySelectorAll('.variant-tab').forEach(t => t.classList.remove('active'));
+            container.querySelectorAll('.variant-section').forEach(s => s.classList.remove('active'));
+            
+            // Add active class to clicked tab and corresponding section
+            tab.classList.add('active');
+            const section = container.querySelector(`.variant-section-${tier.toLowerCase()}`);
+            if (section) section.classList.add('active');
+            
+            // Update product image for this tier
+            if (productCard) {
+              updateProductImage(productCard, product, variantsByTier[tier]);
             }
-            if (!stockFilter && !variant.available) {
-              return false;
-            }
-            return true;
           });
 
-          if (filteredVariants.length > 0) {
-            const section = document.createElement('div');
-            section.className = `variant-section variant-section-${tier.toLowerCase()}`;
+          tabs.appendChild(tab);
+        });
 
-            const title = document.createElement('div');
-            title.className = `variant-title variant-title-${tier.toLowerCase()}`;
-            title.textContent = tier;
-            section.appendChild(title);
+        tabsContainer.appendChild(tabs);
+        container.appendChild(tabsContainer);
+      }
 
-            const weights = document.createElement('div');
-            weights.className = 'variant-weights';
-
-            filteredVariants.forEach(variant => {
-              const row = document.createElement('div');
-              row.className = variant.available ? 'weight-row in-stock' : 'weight-row out-of-stock';
-              
-              // Add click handler to stop event propagation
-              row.addEventListener('click', (e) => {
-                e.stopPropagation();
-              });
-
-              const infoRow = document.createElement('div');
-              infoRow.className = 'weight-info-row';
-
-              const info = document.createElement('div');
-              info.className = 'weight-info';
-
-              const label = document.createElement('span');
-              label.className = 'weight-label';
-              label.textContent = variant.correctedWeight;
-
-              const price = document.createElement('span');
-              price.className = 'weight-price';
-              price.textContent = `$${variant.price}`;
-
-              info.appendChild(label);
-              info.appendChild(price);
-              infoRow.appendChild(info);
-
-              const stockBadge = document.createElement('span');
-              stockBadge.className = `stock-badge ${variant.available ? 'in-stock-badge' : 'out-of-stock-badge'}`;
-              stockBadge.textContent = variant.available ? 'In Stock' : 'Out of Stock';
-
-              row.appendChild(infoRow);
-              row.appendChild(stockBadge);
-
-              if (variant.available) {
-                const addButton = document.createElement('button');
-                addButton.className = 'add-to-cart-button';
-                addButton.textContent = 'Add to Cart';
-                addButton.onclick = (e) => {
-                  e.stopPropagation();
-                  virtualCart.addItem(product, variant);
-                };
-                row.appendChild(addButton);
-              }
-
-              weights.appendChild(row);
-            });
-
-            section.appendChild(weights);
-            container.appendChild(section);
+      // Create sections for each tier
+      availableTiers.forEach((tier, index) => {
+        const tierVariants = variantsByTier[tier];
+        const filteredVariants = tierVariants.filter(variant => {
+          if (weightFilter !== 'all' && variant.correctedWeight !== weightFilter) {
+            return false;
           }
+          if (!stockFilter && !variant.available) {
+            return false;
+          }
+          return true;
+        });
+
+        const section = document.createElement('div');
+        section.className = `variant-section variant-section-${tier.toLowerCase()}`;
+        
+        // Only show first section by default if there are tabs
+        if (availableTiers.length > 1) {
+          if (index === 0) section.classList.add('active');
+        } else {
+          section.classList.add('active');
         }
+
+        const title = document.createElement('div');
+        title.className = `variant-title variant-title-${tier.toLowerCase()}`;
+        title.textContent = tier;
+        section.appendChild(title);
+
+        const weights = document.createElement('div');
+        weights.className = 'variant-weights';
+
+        filteredVariants.forEach(variant => {
+          const row = document.createElement('div');
+          row.className = variant.available ? 'weight-row in-stock' : 'weight-row out-of-stock';
+          
+          // Add click handler to stop event propagation
+          row.addEventListener('click', (e) => {
+            e.stopPropagation();
+          });
+
+          const infoRow = document.createElement('div');
+          infoRow.className = 'weight-info-row';
+
+          const info = document.createElement('div');
+          info.className = 'weight-info';
+
+          const label = document.createElement('span');
+          label.className = 'weight-label';
+          label.textContent = variant.correctedWeight;
+
+          const price = document.createElement('span');
+          price.className = 'weight-price';
+          price.textContent = `$${variant.price}`;
+
+          info.appendChild(label);
+          info.appendChild(price);
+          infoRow.appendChild(info);
+
+          const stockBadge = document.createElement('span');
+          stockBadge.className = `stock-badge ${variant.available ? 'in-stock-badge' : 'out-of-stock-badge'}`;
+          stockBadge.textContent = variant.available ? 'In Stock' : 'Out of Stock';
+
+          row.appendChild(infoRow);
+          row.appendChild(stockBadge);
+
+          if (variant.available) {
+            const addButton = document.createElement('button');
+            addButton.className = 'add-to-cart-button';
+            addButton.textContent = 'Add to Cart';
+            addButton.onclick = (e) => {
+              e.stopPropagation();
+              virtualCart.addItem(product, variant);
+            };
+            row.appendChild(addButton);
+          }
+
+          weights.appendChild(row);
+        });
+
+        section.appendChild(weights);
+        container.appendChild(section);
       });
 
       return container;
@@ -3252,15 +3499,17 @@ Using cached data from: ${new Date(parseInt(localStorage.getItem(CACHE_TIMESTAMP
         <h2 class="modal-title">Shopping Cart</h2>
         <button class="close-modal" onclick="closeCartModal()">&times;</button>
       </div>
-      <div id="cart-items">
+      <div class="modal-content" id="cart-items">
         <!-- Cart items will be dynamically inserted here -->
       </div>
-      <div class="cart-total">
-        Total: $<span id="cart-total">0.00</span>
+      <div class="modal-footer">
+        <div class="cart-total">
+          Total: $<span id="cart-total">0.00</span>
+        </div>
+        <button id="checkout-button" class="checkout-button" onclick="checkout()">
+          Proceed to Checkout
+        </button>
       </div>
-      <button id="checkout-button" class="checkout-button" onclick="checkout()">
-        Proceed to Checkout
-      </button>
     </div>
   </div>
 </body>
