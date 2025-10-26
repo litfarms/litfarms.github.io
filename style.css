@@ -660,6 +660,12 @@
   body.modal-open {
     overflow: hidden;
   }
+  
+  /* Hide cart/settings buttons when modal is open */
+  body.modal-open #settings-button,
+  body.modal-open .virtual-cart-button {
+    display: none;
+  }
 
   .modal-header {
     display: flex;
@@ -752,6 +758,7 @@
     -webkit-appearance: none;
     -moz-appearance: none;
     appearance: none;
+    max-height: 150px;
   }
 
   .settings-select:not([multiple]) {
@@ -1658,6 +1665,12 @@
     
     #stock-filter {
       width: 100%;
+    }
+    
+    /* Make filters toggle button match width of other filters */
+    .filters-toggle {
+      width: calc(100% - 16px);
+      margin: 0 8px 8px 8px;
     }
     
     #product-count {
