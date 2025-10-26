@@ -709,7 +709,20 @@
   .modal-footer {
     padding: 15px 20px;
     border-top: 1px solid var(--border-glow);
+    display: flex;
+    justify-content: flex-end;
+    gap: 10px;
     flex-shrink: 0;
+  }
+  
+  /* Add extra padding on mobile to avoid browser bottom bar */
+  @media (max-width: 700px) {
+    .modal-footer {
+      padding-bottom: 30px;
+    }
+  }
+
+  .modal {
     background-color: var(--bg-secondary);
   }
 

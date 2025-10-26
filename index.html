@@ -92,11 +92,16 @@
       }, false);
     });
     
-    // Show buttons immediately after setup
-    settingsBtn.style.opacity = '1';
-    settingsBtn.style.pointerEvents = 'auto';
-    cartBtn.style.opacity = '1';
-    cartBtn.style.pointerEvents = 'auto';
+    // Show buttons after delay on mobile, immediately on desktop
+    var isMobile = window.innerWidth <= 700;
+    var delay = isMobile ? 3000 : 0; // 3 seconds on mobile, instant on desktop
+    
+    setTimeout(function() {
+      settingsBtn.style.opacity = '1';
+      settingsBtn.style.pointerEvents = 'auto';
+      cartBtn.style.opacity = '1';
+      cartBtn.style.pointerEvents = 'auto';
+    }, delay);
   </script>
 
   <div id="site-status" class="site-status">
