@@ -70,6 +70,7 @@
       <select id="weight-filter">
         <option value="all">All Weights</option>
         <option value="28g">28g</option>
+        <option value="28g (Smalls)">28g (Smalls)</option>
         <option value="3.5g">3.5g</option>
       </select>
       <select id="sort-filter">
@@ -82,7 +83,7 @@
       </select>
       <button id="stock-filter" class="stock-filter-btn active">Show All</button>
     </div>
-    <div id="product-count" style="text-align: center; margin: 8px 0; color: #03dac6;">
+    <div id="product-count" style="text-align: center; margin: 8px 0; color: var(--text-secondary);text-shadow: 0 2px 5px rgb(0 0 0 / 50%);">
       Showing 0 products
     </div>
   </div>
@@ -93,6 +94,13 @@
   <div id="loader" class="loader-container" style="display: none;">
     <span class="loader"></span>
     <div class="loader-text">Loading products...</div>
+  </div>
+
+  <!-- Lightbox for images -->
+  <div id="image-lightbox" class="lightbox" style="display: none;">
+    <span class="lightbox-close">&times;</span>
+    <img class="lightbox-content" id="lightbox-img">
+    <div class="lightbox-caption" id="lightbox-caption"></div>
   </div>
 
   <script>
@@ -110,6 +118,12 @@
 
     // Declare updateCheckerId at the top level
     let updateCheckerId = null;
+
+    // Hardcoded referral parameters
+    const REFERRAL_PARAMS = {
+      sca_ref: '9871506.3QN5sUKgOM',
+      sca_crp: 'MjMzMjUw'
+    };
 
     // Settings Management
     const DEFAULT_SETTINGS = {
@@ -477,9 +491,20 @@
 
               // Regular click behavior - go to product page
               let url = `https://litfarms.com/products/${product.handle}`;
+              const params = new URLSearchParams();
+              
               if (relevantVariants.length === 1) {
-                url += `?variant=${relevantVariants[0].id}`;
+                params.append('variant', relevantVariants[0].id);
               }
+              
+              // Add referral parameters
+              params.append('sca_ref', REFERRAL_PARAMS.sca_ref);
+              params.append('sca_crp', REFERRAL_PARAMS.sca_crp);
+              
+              if (params.toString()) {
+                url += `?${params.toString()}`;
+              }
+              
               window.open(url, '_blank');
             });
 
@@ -589,8 +614,16 @@
       // Set the image source
       image.src = filteredImages[0].src;
 
-      // Remove tabIndex and keyboard handlers since we're not navigating images
-      imageContainer.removeAttribute('tabIndex');
+      // Add click handler to open lightbox with original high-res image
+      image.addEventListener('click', (e) => {
+        e.stopPropagation(); // Prevent card click
+        // Pass the original image source for highest quality
+        const originalSrc = filteredImages[0].src;
+        openLightbox(originalSrc, product.title);
+      });
+
+      // Add visual indicator that image is clickable
+      image.style.cursor = 'zoom-in';
 
       return imageContainer;
     }
@@ -774,13 +807,22 @@
       const sortFilter = domElements.sortFilter.value;
 
       const filteredProducts = products.filter((product) => {
-        // Check search query first
-        if (searchQuery && !product.title.toLowerCase().includes(searchQuery)) {
-          return false;
-        }
-
-        // Process variants with utility function
+        // Process variants with utility function first
         const correctedVariants = utils.processVariants(product);
+        
+        // Check search query - search in title AND variant options
+        if (searchQuery) {
+          const titleMatch = product.title.toLowerCase().includes(searchQuery);
+          const variantMatch = correctedVariants.some(v => 
+            v.correctedWeight?.toLowerCase().includes(searchQuery) ||
+            v.correctedTier?.toLowerCase().includes(searchQuery) ||
+            v.title?.toLowerCase().includes(searchQuery)
+          );
+          
+          if (!titleMatch && !variantMatch) {
+            return false;
+          }
+        }
 
         // If no valid variants at all, filter out the product
         if (correctedVariants.length === 0) {
@@ -1027,8 +1069,12 @@
               );
 
               if (oldVariant) {
-                if (oldVariant.available !== newVariant.available ||
-                    oldVariant.price !== newVariant.price) {
+                // Check for availability changes
+                const availabilityChanged = oldVariant.available !== newVariant.available;
+                // Only track price changes if the item is currently in stock or was in stock
+                const priceChanged = oldVariant.price !== newVariant.price && (oldVariant.available || newVariant.available);
+                
+                if (availabilityChanged || priceChanged) {
                   hasChanges = true;
                   changedVariants.push({
                     ...newVariant,
@@ -1290,7 +1336,8 @@ Using cached data from: ${new Date(parseInt(localStorage.getItem(CACHE_TIMESTAMP
 
     // Update the startProductUpdateChecker function
     function startProductUpdateChecker() {
-      let lastProducts = products;
+      // Create a deep copy of products to avoid reference issues
+      let lastProducts = JSON.parse(JSON.stringify(products));
       const intervalMs = currentSettings.checkInterval * 60 * 1000;
 
       console.log(`Starting product update checker - checking every ${currentSettings.checkInterval} minutes`);
@@ -1310,9 +1357,13 @@ Using cached data from: ${new Date(parseInt(localStorage.getItem(CACHE_TIMESTAMP
             console.log('Changes detected, updating state and sending notifications...');
             await handleNotifications(changes);
             products = freshProducts;
-            lastProducts = freshProducts;
+            // Update lastProducts with a deep copy
+            lastProducts = JSON.parse(JSON.stringify(freshProducts));
             filterProducts();
             updateProductSelectList();
+          } else {
+            // Even if no changes, update lastProducts to keep it in sync
+            lastProducts = JSON.parse(JSON.stringify(freshProducts));
           }
         } catch (error) {
           console.error('Error checking for product updates:', error);
@@ -1466,13 +1517,20 @@ Using cached data from: ${new Date(parseInt(localStorage.getItem(CACHE_TIMESTAMP
             toggleLoader(false);
             filterProducts();
             
-            // Then check for updates in the background
+            // Then check for updates in the background without re-rendering if unchanged
             try {
               const updatedProducts = await getProducts(false);
-              if (JSON.stringify(products) !== JSON.stringify(updatedProducts)) {
+              // Only update if products actually changed (compare lengths and IDs)
+              const productsChanged = products.length !== updatedProducts.length ||
+                products.some((p, i) => p.id !== updatedProducts[i]?.id || 
+                  p.variants.length !== updatedProducts[i]?.variants.length);
+              
+              if (productsChanged) {
                 console.log('Products updated, refreshing display');
                 products = updatedProducts;
                 filterProducts();
+              } else {
+                console.log('Products unchanged, skipping re-render');
               }
             } catch (updateError) {
               console.warn('Background update failed:', updateError);
@@ -1604,9 +1662,59 @@ Using cached data from: ${new Date(parseInt(localStorage.getItem(CACHE_TIMESTAMP
       }));
     }
 
+    // Lightbox Functions
+    function openLightbox(imageSrc, caption) {
+      const lightbox = document.getElementById('image-lightbox');
+      const lightboxImg = document.getElementById('lightbox-img');
+      const lightboxCaption = document.getElementById('lightbox-caption');
+      
+      // Get higher resolution image by removing size parameters from Shopify URLs
+      let highResImageSrc = imageSrc;
+      
+      // Shopify images often have size parameters like _300x300 or _small
+      // Remove these to get the original high-res image
+      if (imageSrc.includes('cdn.shopify.com')) {
+        // Remove size suffixes like _300x300, _small, _medium, _large, _compact, _grande
+        highResImageSrc = imageSrc.replace(/_(pico|icon|thumb|small|compact|medium|large|grande|original|\d+x\d*|x\d+)(\.[a-z]+)/gi, '_2048x2048$2');
+        // Or just get the master/original
+        highResImageSrc = imageSrc.replace(/_(pico|icon|thumb|small|compact|medium|large|grande|\d+x\d*|x\d+)\./gi, '_master.');
+      }
+      
+      lightbox.style.display = 'flex';
+      lightboxImg.src = highResImageSrc;
+      lightboxCaption.textContent = caption;
+      document.body.style.overflow = 'hidden'; // Prevent background scrolling
+    }
+
+    function closeLightbox() {
+      const lightbox = document.getElementById('image-lightbox');
+      lightbox.style.display = 'none';
+      document.body.style.overflow = ''; // Restore scrolling
+    }
+
     // Document ready event listener
     document.addEventListener('DOMContentLoaded', async () => {
       toggleLoader(true);
+
+      // Lightbox event listeners
+      const lightbox = document.getElementById('image-lightbox');
+      const lightboxClose = document.querySelector('.lightbox-close');
+      
+      lightboxClose.addEventListener('click', closeLightbox);
+      
+      // Close lightbox when clicking outside the image
+      lightbox.addEventListener('click', (e) => {
+        if (e.target === lightbox) {
+          closeLightbox();
+        }
+      });
+      
+      // Close lightbox with Escape key
+      document.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape' && lightbox.style.display === 'flex') {
+          closeLightbox();
+        }
+      });
 
       // Settings modal
       document.getElementById('settings-button').addEventListener('click', openSettingsModal);
@@ -1669,47 +1777,23 @@ Using cached data from: ${new Date(parseInt(localStorage.getItem(CACHE_TIMESTAMP
         productSelect.appendChild(item);
       });
 
-      // Search functionality
-      const searchInput = document.getElementById('product-search');
-      
-      function filterProducts(searchTerm) {
-        const items = productSelect.getElementsByClassName('product-select-item');
-        const term = searchTerm.toLowerCase();
-        
-        Array.from(items).forEach(item => {
-          const label = item.querySelector('label');
-          const title = label.textContent.toLowerCase();
-          
-          if (title.includes(term)) {
-            item.classList.remove('hidden');
-          } else {
-            item.classList.add('hidden');
-          }
-        });
-      }
-
-      // Search event listener
-      searchInput.addEventListener('input', (e) => {
-        filterProducts(e.target.value);
-      });
-
-      // Clear search when modal is opened
-      searchInput.value = '';
-      filterProducts('');
+      // Update count
+      updateProductsSelectedCount();
     }
 
-    // Settings Modal Management
     function openSettingsModal() {
-      const modal = document.getElementById('settings-modal');
-      modal.style.display = 'flex';
-      
       // Load current settings into form
       document.getElementById('check-interval').value = currentSettings.checkInterval;
-      document.getElementById('ntfy-enabled').checked = currentSettings.ntfyAppEnabled;
-      document.getElementById('email-enabled').checked = currentSettings.ntfyEmailEnabled;
       document.getElementById('ntfy-topic').value = currentSettings.ntfyTopic;
       document.getElementById('ntfy-server').value = currentSettings.ntfyServer;
       document.getElementById('ntfy-email').value = currentSettings.ntfyEmail;
+      document.getElementById('ntfy-enabled').checked = currentSettings.ntfyAppEnabled;
+      document.getElementById('email-enabled').checked = currentSettings.ntfyEmailEnabled;
+      
+      // Set notification type checkboxes
+      document.getElementById('notify-new').checked = currentSettings.notifyNew;
+      document.getElementById('notify-stock').checked = currentSettings.notifyStock;
+      document.getElementById('notify-removed').checked = currentSettings.notifyRemoved;
       
       // Update the minutes suffix position immediately after setting the value
       requestAnimationFrame(updateMinutesSuffixPosition);
@@ -1741,14 +1825,39 @@ Using cached data from: ${new Date(parseInt(localStorage.getItem(CACHE_TIMESTAMP
         weightSelect.querySelector('option[value="all"]').selected = true;
       }
       
-      // Set checkboxes
-      document.getElementById('notify-new').checked = currentSettings.notifyNew;
-      document.getElementById('notify-stock').checked = currentSettings.notifyStock;
-      document.getElementById('notify-removed').checked = currentSettings.notifyRemoved;
-      
       // Update product list and clear search
       updateProductSelectList();
+      
+      // Clear search input
+      const searchInput = document.getElementById('product-search');
+      searchInput.value = '';
+      
+      // Setup search functionality
+      const productSelect = document.getElementById('product-select');
+      
+      // Remove old event listener if exists
+      const newSearchInput = searchInput.cloneNode(true);
+      searchInput.parentNode.replaceChild(newSearchInput, searchInput);
+      
+      newSearchInput.addEventListener('input', (e) => {
+        const items = productSelect.getElementsByClassName('product-select-item');
+        const term = e.target.value.toLowerCase();
+        
+        Array.from(items).forEach(item => {
+          const label = item.querySelector('label');
+          const title = label.textContent.toLowerCase();
+          
+          if (title.includes(term)) {
+            item.classList.remove('hidden');
+          } else {
+            item.classList.add('hidden');
+          }
+        });
+      });
 
+      // Show modal
+      const modal = document.getElementById('settings-modal');
+      modal.style.display = 'flex';
       document.body.classList.add('modal-open');
     }
 
@@ -2110,7 +2219,7 @@ Using cached data from: ${new Date(parseInt(localStorage.getItem(CACHE_TIMESTAMP
     });
 
     // Utility Functions
-    const WEIGHTS = ['28g', '3.5g', '7g'];
+    const WEIGHTS = ['28g', '3.5g', '7g', '28g (Smalls)'];
     const TIERS = ['Essential', 'Preferred', 'Supreme'];
     
     const utils = {
@@ -2121,6 +2230,10 @@ Using cached data from: ${new Date(parseInt(localStorage.getItem(CACHE_TIMESTAMP
       standardizeWeight: (weightStr) => {
         if (!weightStr) return null;
         weightStr = weightStr.trim();
+        // Handle "28g (Smalls)" as a special case
+        if (weightStr.toLowerCase().includes('smalls')) {
+          return '28g (Smalls)';
+        }
         if (weightStr.match(/^\d+\.?\d*$/)) weightStr += 'g';
         if (weightStr === '3.5') weightStr = '3.5g';
         return weightStr;
@@ -2443,31 +2556,27 @@ Using cached data from: ${new Date(parseInt(localStorage.getItem(CACHE_TIMESTAMP
     function checkout() {
       if (virtualCart.items.length === 0) return;
 
-      // Create a form to submit all items
-      const form = document.createElement('form');
-      form.method = 'post';
-      form.action = 'https://litfarms.com/cart/add';
-      form.target = '_blank';
+      // Build a Shopify cart permalink
+      const cartItems = virtualCart.items.map(item => 
+        item.variantId + ':' + item.quantity
+      ).join(',');
+      
+      const params = new URLSearchParams();
+      params.append('sca_ref', REFERRAL_PARAMS.sca_ref);
+      params.append('sca_crp', REFERRAL_PARAMS.sca_crp);
 
-      // Add each item as a hidden input with its quantity
-      virtualCart.items.forEach((item, index) => {
-        const input = document.createElement('input');
-        input.type = 'hidden';
-        input.name = `items[${index}][id]`;
-        input.value = item.variantId;
-        form.appendChild(input);
+      // First, open homepage with referral params to initialize the tracking
+      const homeUrl = 'https://litfarms.com/?' + params.toString();
+      const newWindow = window.open(homeUrl, '_blank');
 
-        const quantityInput = document.createElement('input');
-        quantityInput.type = 'hidden';
-        quantityInput.name = `items[${index}][quantity]`;
-        quantityInput.value = item.quantity.toString();
-        form.appendChild(quantityInput);
-      });
-
-      // Submit the form
-      document.body.appendChild(form);
-      form.submit();
-      document.body.removeChild(form);
+      // After a delay, redirect to the cart with items
+      // This gives the referral tracking time to initialize
+      setTimeout(() => {
+        if (newWindow && !newWindow.closed) {
+          const cartUrl = 'https://litfarms.com/cart/' + cartItems + '?' + params.toString();
+          newWindow.location.href = cartUrl;
+        }
+      }, 1000);
 
       // Clear the virtual cart
       virtualCart.clearCart();
