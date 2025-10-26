@@ -1719,27 +1719,12 @@ Using cached data from: ${new Date(parseInt(localStorage.getItem(CACHE_TIMESTAMP
     function setupFiltersToggle() {
       const filtersToggle = document.getElementById('filters-toggle');
       const filtersContainer = document.querySelector('.filters-container');
-      const productGrid = document.querySelector('.product-grid');
       
       if (!filtersToggle) return;
-
-      // Function to update grid margin
-      function updateGridMargin() {
-        if (window.innerWidth <= 700) {
-          if (filtersContainer.classList.contains('collapsed')) {
-            productGrid.style.marginTop = '80px';
-          } else {
-            productGrid.style.marginTop = '200px';
-          }
-        } else {
-          productGrid.style.marginTop = '';
-        }
-      }
 
       // Toggle on button click
       filtersToggle.addEventListener('click', () => {
         filtersContainer.classList.toggle('collapsed');
-        updateGridMargin();
         isFiltersManuallyToggled = true;
         
         // Reset manual toggle flag after 3 seconds
@@ -1749,35 +1734,24 @@ Using cached data from: ${new Date(parseInt(localStorage.getItem(CACHE_TIMESTAMP
       });
 
       // Auto-collapse on scroll down (mobile only)
-      let scrollTimeout;
       window.addEventListener('scroll', () => {
         // Only auto-collapse on mobile
         if (window.innerWidth > 700) return;
         if (isFiltersManuallyToggled) return;
-
-        clearTimeout(scrollTimeout);
         
         const currentScrollY = window.scrollY;
         
         // Collapse when scrolling down past 100px
         if (currentScrollY > 100 && currentScrollY > lastScrollY) {
           filtersContainer.classList.add('collapsed');
-          updateGridMargin();
         }
         // Expand when scrolling back to top
         else if (currentScrollY < 50) {
           filtersContainer.classList.remove('collapsed');
-          updateGridMargin();
         }
         
         lastScrollY = currentScrollY;
       });
-
-      // Update margin on window resize
-      window.addEventListener('resize', updateGridMargin);
-      
-      // Initial margin setup
-      updateGridMargin();
     }
 
     // Document ready event listener
