@@ -807,6 +807,15 @@
     box-shadow: var(--shadow-hover);
   }
 
+  /* Use dvh (dynamic viewport height) for mobile to handle address bar */
+  @supports (height: 100dvh) {
+    @media (max-width: 700px) {
+      #settings-button {
+        bottom: calc(100dvh - 100vh + 20px);
+      }
+    }
+  }
+
   /* Modal Styles */
   .modal-overlay {
     display: none;
@@ -1489,6 +1498,15 @@
     /* Hidden until ready */
     opacity: 0;
     pointer-events: none;
+  }
+
+  /* Use dvh (dynamic viewport height) for mobile to handle address bar */
+  @supports (height: 100dvh) {
+    @media (max-width: 700px) {
+      .virtual-cart-button {
+        bottom: calc(100dvh - 100vh + 20px);
+      }
+    }
   }
 
   .virtual-cart-button:hover {
