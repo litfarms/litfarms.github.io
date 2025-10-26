@@ -571,11 +571,14 @@
     cursor: pointer;
     box-shadow: var(--shadow-normal);
     transition: all 0.3s ease;
-    z-index: 1000;
+    z-index: 1500;
     display: flex;
     align-items: center;
     justify-content: center;
     padding: 0;
+    pointer-events: auto;
+    touch-action: manipulation;
+    -webkit-tap-highlight-color: transparent;
   }
 
   #settings-button svg {
@@ -1096,10 +1099,13 @@
     cursor: pointer;
     box-shadow: var(--shadow-normal);
     transition: all 0.3s ease;
-    z-index: 1000;
+    z-index: 1500;
     display: flex;
     align-items: center;
     justify-content: center;
+    pointer-events: auto;
+    touch-action: manipulation;
+    -webkit-tap-highlight-color: transparent;
   }
 
   .virtual-cart-button:hover {
@@ -1540,6 +1546,21 @@
 
   /* Mobile responsive */
   @media (max-width: 700px) {
+    /* Move fixed buttons higher on mobile to avoid product overlap */
+    #settings-button {
+      bottom: 30px;
+      right: 15px;
+      width: 55px;
+      height: 55px;
+    }
+    
+    .virtual-cart-button {
+      bottom: 30px;
+      right: 85px;
+      width: 55px;
+      height: 55px;
+    }
+    
     .lightbox {
       padding: 50px 10px 10px 10px;
     }
