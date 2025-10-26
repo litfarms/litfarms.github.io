@@ -40,12 +40,19 @@
   </button>
 
   <script>
+    // Store scroll position for modals
+    var modalScrollPosition = 0;
+    
     // Define functions immediately
     window.openCartModal = function() {
       var modal = document.getElementById('cart-modal');
       if (modal) {
+        // Save scroll position
+        modalScrollPosition = window.pageYOffset || document.documentElement.scrollTop;
+        
         modal.style.display = 'flex';
         document.body.classList.add('modal-open');
+        document.body.style.top = '-' + modalScrollPosition + 'px';
       }
     };
     
@@ -54,14 +61,22 @@
       if (modal) {
         modal.style.display = 'none';
         document.body.classList.remove('modal-open');
+        document.body.style.top = '';
+        
+        // Restore scroll position
+        window.scrollTo(0, modalScrollPosition);
       }
     };
     
     window.openSettingsModal = function() {
       var modal = document.getElementById('settings-modal');
       if (modal) {
+        // Save scroll position
+        modalScrollPosition = window.pageYOffset || document.documentElement.scrollTop;
+        
         modal.style.display = 'flex';
         document.body.classList.add('modal-open');
+        document.body.style.top = '-' + modalScrollPosition + 'px';
       }
     };
     
@@ -70,6 +85,10 @@
       if (modal) {
         modal.style.display = 'none';
         document.body.classList.remove('modal-open');
+        document.body.style.top = '';
+        
+        // Restore scroll position
+        window.scrollTo(0, modalScrollPosition);
       }
     };
     
