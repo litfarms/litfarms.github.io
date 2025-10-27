@@ -449,6 +449,19 @@
     text-align: center;
   }
 
+  /* Strain-specific title colors */
+  .product-card[data-strain-type="sativa"] .product-title {
+    color: var(--strain-sativa);
+  }
+
+  .product-card[data-strain-type="indica"] .product-title {
+    color: var(--strain-indica);
+  }
+
+  .product-card[data-strain-type="hybrid"] .product-title {
+    color: var(--strain-hybrid);
+  }
+
   .product-price {
     font-size: 1.2em;
     color: var(--accent-secondary);
