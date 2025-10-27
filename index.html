@@ -54,10 +54,8 @@
         modal.style.display = 'flex';
         document.body.classList.add('modal-open');
         
-        // Only use position fixed on desktop to avoid mobile issues
-        if (window.innerWidth > 700) {
-          document.body.style.top = '-' + modalScrollPosition + 'px';
-        }
+        // Set body top to prevent scroll jump
+        document.body.style.top = '-' + modalScrollPosition + 'px';
       }
     };
     
@@ -68,10 +66,8 @@
         document.body.classList.remove('modal-open');
         document.body.style.top = '';
         
-        // Restore scroll position only on desktop
-        if (window.innerWidth > 700) {
-          window.scrollTo(0, modalScrollPosition);
-        }
+        // Restore scroll position
+        window.scrollTo(0, modalScrollPosition);
         
         // Small delay to prevent immediate re-triggering on mobile
         setTimeout(function() {
@@ -89,10 +85,8 @@
         modal.style.display = 'flex';
         document.body.classList.add('modal-open');
         
-        // Only use position fixed on desktop to avoid mobile issues
-        if (window.innerWidth > 700) {
-          document.body.style.top = '-' + modalScrollPosition + 'px';
-        }
+        // Set body top to prevent scroll jump
+        document.body.style.top = '-' + modalScrollPosition + 'px';
       }
     };
     
@@ -103,10 +97,8 @@
         document.body.classList.remove('modal-open');
         document.body.style.top = '';
         
-        // Restore scroll position only on desktop
-        if (window.innerWidth > 700) {
-          window.scrollTo(0, modalScrollPosition);
-        }
+        // Restore scroll position
+        window.scrollTo(0, modalScrollPosition);
         
         // Small delay to prevent immediate re-triggering on mobile
         setTimeout(function() {
@@ -137,7 +129,7 @@
     
     // Show buttons after delay on mobile, immediately on desktop
     var isMobile = window.innerWidth <= 700;
-    var delay = isMobile ? 5000 : 0; // 5 seconds on mobile, instant on desktop
+    var delay = isMobile ? 2000 : 0; // 5 seconds on mobile, instant on desktop
     
     setTimeout(function() {
       settingsBtn.style.opacity = '1';
