@@ -217,7 +217,21 @@
         <option value="date-desc">Newest First</option>
         <option value="date-asc">Oldest First</option>
       </select>
-      <button id="stock-filter" class="stock-filter-btn active">Show All</button>
+      <button id="stock-filter" class="stock-filter-btn active">
+        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path>
+          <polyline points="3.27 6.96 12 12.01 20.73 6.96"></polyline>
+          <line x1="12" y1="22.08" x2="12" y2="12"></line>
+        </svg>
+        <span>All Items</span>
+      </button>
+      <button id="sale-filter" class="sale-filter-btn">
+        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z"></path>
+          <line x1="7" y1="7" x2="7.01" y2="7"></line>
+        </svg>
+        <span>All Items</span>
+      </button>
     </div>
     <div id="product-count" style="text-align: center; margin: 8px 0; color: var(--text-secondary);text-shadow: 0 2px 5px rgb(0 0 0 / 50%);">
       Showing 0 products
@@ -629,6 +643,9 @@
             if (!domElements.stockFilter.classList.contains('active')) {
               relevantVariants = relevantVariants.filter(v => v.available);
             }
+            if (domElements.saleFilter.classList.contains('active')) {
+              relevantVariants = relevantVariants.filter(v => v.isOnSale);
+            }
 
             productCard.addEventListener('click', (e) => {
               // Check if the click was on the COA button
@@ -728,14 +745,30 @@
           });
         };
 
+        // Force 5 columns on large screens to prevent auto-fill recalculation
+        if (window.innerWidth >= 1200) {
+          productGrid.style.gridTemplateColumns = 'repeat(5, 1fr)';
+        }
+
         // Render first two rows immediately
         renderBatch(filteredProducts, 0, initialLoadCount);
 
-        // Render the rest after a short delay
+        // Render the rest in smaller chunks to avoid blocking
         if (filteredProducts.length > initialLoadCount) {
-          setTimeout(() => {
-            renderBatch(filteredProducts, initialLoadCount, filteredProducts.length);
-          }, 300); // Wait for initial batch animations to complete
+          const chunkSize = 20; // Render 20 items at a time
+          let currentIndex = initialLoadCount;
+          
+          const renderNextChunk = () => {
+            const endIndex = Math.min(currentIndex + chunkSize, filteredProducts.length);
+            renderBatch(filteredProducts, currentIndex, endIndex);
+            currentIndex = endIndex;
+            
+            if (currentIndex < filteredProducts.length) {
+              requestAnimationFrame(renderNextChunk);
+            }
+          };
+          
+          requestAnimationFrame(renderNextChunk);
         }
       }, 200); // Match this with the fade-out transition duration
     }
@@ -1062,6 +1095,7 @@
       const strainTypeFilter = domElements.strainTypeFilter.value;
       const weightFilter = domElements.weightFilter.value;
       const stockFilter = domElements.stockFilter.classList.contains('active');
+      const saleFilter = domElements.saleFilter.classList.contains('active');
       const searchQuery = domElements.searchInput.value.toLowerCase().trim();
       const sortFilter = domElements.sortFilter.value;
 
@@ -1138,6 +1172,28 @@
           }
         }
 
+        // Check sale status
+        if (saleFilter) {
+          let saleCheckVariants = correctedVariants;
+          if (weightFilter !== 'all') {
+            saleCheckVariants = saleCheckVariants.filter(v => 
+              v.correctedWeight === weightFilter && 
+              v.hasPrice
+            );
+          }
+          if (strainFilter !== 'all') {
+            saleCheckVariants = saleCheckVariants.filter(v => v.correctedTier === strainFilter);
+          }
+          if (!stockFilter) {
+            saleCheckVariants = saleCheckVariants.filter(v => v.available);
+          }
+          
+          const hasOnSaleVariant = saleCheckVariants.some(variant => variant.isOnSale);
+          if (!hasOnSaleVariant) {
+            return false;
+          }
+        }
+
         return true;
       });
 
@@ -1155,7 +1211,8 @@
         strainTypeFilter: document.getElementById('strain-type-filter').value,
         weightFilter: document.getElementById('weight-filter').value,
         sortFilter: document.getElementById('sort-filter').value,
-        stockFilter: document.getElementById('stock-filter').classList.contains('active')
+        stockFilter: document.getElementById('stock-filter').classList.contains('active'),
+        saleFilter: document.getElementById('sale-filter').classList.contains('active')
       };
       localStorage.setItem('litFarmsFilterState', JSON.stringify(filterState));
     }
@@ -1183,16 +1240,31 @@
         const stockButton = document.getElementById('stock-filter');
         if (filterState.stockFilter) {
           stockButton.classList.add('active');
-          stockButton.textContent = 'Show All Items';
+          stockButton.querySelector('span').textContent = 'All Items';
         } else {
           stockButton.classList.remove('active');
-          stockButton.textContent = 'In Stock Only';
+          stockButton.querySelector('span').textContent = 'In Stock Only';
+        }
+        
+        // Restore sale filter button state
+        const saleButton = document.getElementById('sale-filter');
+        if (filterState.saleFilter) {
+          saleButton.classList.add('active');
+          saleButton.querySelector('span').textContent = 'Sales Only';
+        } else {
+          saleButton.classList.remove('active');
+          saleButton.querySelector('span').textContent = 'All Items';
         }
       } else {
         // Set default state for first-time users: In Stock Only
         const stockButton = document.getElementById('stock-filter');
         stockButton.classList.remove('active');
-        stockButton.textContent = 'In Stock Only';
+        stockButton.querySelector('span').textContent = 'In Stock Only';
+        
+        // Set default state for sale filter: All Items
+        const saleButton = document.getElementById('sale-filter');
+        saleButton.classList.remove('active');
+        saleButton.querySelector('span').textContent = 'All Items';
       }
 
       // Always reset search input
@@ -1244,7 +1316,15 @@
     document.getElementById('stock-filter').addEventListener('click', () => {
       const button = document.getElementById('stock-filter');
       button.classList.toggle('active');
-      button.textContent = button.classList.contains('active') ? 'Show All Items' : 'In Stock Only';
+      button.querySelector('span').textContent = button.classList.contains('active') ? 'All Items' : 'In Stock Only';
+      filterProducts();
+      saveFilterState();
+    });
+
+    document.getElementById('sale-filter').addEventListener('click', () => {
+      const button = document.getElementById('sale-filter');
+      button.classList.toggle('active');
+      button.querySelector('span').textContent = button.classList.contains('active') ? 'Sales Only' : 'All Items';
       filterProducts();
       saveFilterState();
     });
@@ -2771,11 +2851,18 @@ Using cached data from: ${new Date(parseInt(localStorage.getItem(CACHE_TIMESTAMP
           const weight = utils.isWeight(v.option1) ? v.option1 : utils.isWeight(v.option2) ? v.option2 : null;
           let tier = utils.isTier(v.option1) ? v.option1 : utils.isTier(v.option2) ? v.option2 : null;
           if (weight && !tier) tier = 'Essential';
+          // Check if on sale: compare_at_price exists, is not null/empty, and is greater than price
+          const comparePrice = v.compare_at_price ? parseFloat(v.compare_at_price) : 0;
+          const currentPrice = parseFloat(v.price);
+          const isOnSale = v.compare_at_price && comparePrice > currentPrice;
+          
           return {
             ...v,
             correctedWeight: weight,
             correctedTier: tier,
-            hasPrice: utils.hasValidPrice(v)
+            hasPrice: utils.hasValidPrice(v),
+            isOnSale: isOnSale,
+            compareAtPrice: v.compare_at_price
           };
         }).filter(v => v.correctedWeight && v.hasPrice);
       },
@@ -2868,6 +2955,7 @@ Using cached data from: ${new Date(parseInt(localStorage.getItem(CACHE_TIMESTAMP
       weightFilter: document.getElementById('weight-filter'),
       sortFilter: document.getElementById('sort-filter'),
       stockFilter: document.getElementById('stock-filter'),
+      saleFilter: document.getElementById('sale-filter'),
       searchInput: document.getElementById('product-search-filter'),
       clearSearch: document.getElementById('clear-search'),
       loader: document.getElementById('loader'),
@@ -3404,6 +3492,15 @@ Using cached data from: ${new Date(parseInt(localStorage.getItem(CACHE_TIMESTAMP
           section.classList.add('active');
         }
 
+        // Check if any variant in this tier is on sale and add ribbon
+        const hasAnySale = filteredVariants.some(v => v.isOnSale);
+        if (hasAnySale) {
+          const saleRibbon = document.createElement('div');
+          saleRibbon.className = 'sale-ribbon';
+          saleRibbon.textContent = 'SALE';
+          section.appendChild(saleRibbon);
+        }
+
         const title = document.createElement('div');
         title.className = `variant-title variant-title-${tier.toLowerCase()}`;
         title.textContent = tier;
@@ -3431,12 +3528,29 @@ Using cached data from: ${new Date(parseInt(localStorage.getItem(CACHE_TIMESTAMP
           label.className = 'weight-label';
           label.textContent = variant.correctedWeight;
 
+          const priceWrapper = document.createElement('div');
+          priceWrapper.className = 'price-wrapper';
+
+          const priceContainer = document.createElement('div');
+          priceContainer.className = 'price-display';
+
+          // Show original price if on sale
+          if (variant.isOnSale && variant.compareAtPrice) {
+            const originalPrice = document.createElement('span');
+            originalPrice.className = 'original-price';
+            originalPrice.textContent = `$${variant.compareAtPrice}`;
+            priceContainer.appendChild(originalPrice);
+          }
+
           const price = document.createElement('span');
-          price.className = 'weight-price';
+          price.className = variant.isOnSale ? 'weight-price sale-price' : 'weight-price';
           price.textContent = `$${variant.price}`;
+          priceContainer.appendChild(price);
+
+          priceWrapper.appendChild(priceContainer);
 
           info.appendChild(label);
-          info.appendChild(price);
+          info.appendChild(priceWrapper);
           infoRow.appendChild(info);
 
           const stockBadge = document.createElement('span');

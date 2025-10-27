@@ -141,6 +141,13 @@
     font-size: 14px;
     touch-action: manipulation; /* Improve touch responsiveness */
     -webkit-tap-highlight-color: transparent;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+  }
+  
+  .filters button svg {
+    flex-shrink: 0;
   }
 
   /* Custom focus style */
@@ -176,7 +183,26 @@
   }
   .filters button:not(.active):hover {
     background-color: var(--border-glow);
+  }
 
+  /* Sale filter button styling - needs higher specificity */
+  .filters .sale-filter-btn.active {
+    background-color: var(--bg-elevated) !important;
+    color: #f43f5e !important;
+    border-color: #f43f5e !important;
+    box-shadow: 0 0 10px rgba(244, 63, 94, 0.3) !important;
+  }
+
+  .filters .sale-filter-btn:not(.active) {
+    background-color: var(--bg-secondary) !important;
+    color: var(--accent-primary) !important;
+    border-color: var(--accent-primary) !important;
+  }
+
+  .filters .sale-filter-btn:not(.active):hover {
+    background-color: var(--bg-elevated) !important;
+    color: var(--accent-secondary) !important;
+    border-color: var(--accent-secondary) !important;
   }
 
   .product-grid {
@@ -193,7 +219,7 @@
   /* Force 5 columns on larger screens */
   @media (min-width: 1200px) {
     .product-grid {
-      grid-template-columns: repeat(5, 1fr);
+      grid-template-columns: repeat(5, 1fr) !important;
     }
   }
 
@@ -217,12 +243,16 @@
     box-shadow: var(--shadow-normal);
     transition: all 0.3s ease;
     max-width: 100%;
+    min-width: 0;
+    width: 100%;
+    box-sizing: border-box;
     margin: 0 auto;
     cursor: pointer;
     border: 1px solid transparent;
     opacity: 0;
     transform: translateY(10px);
     animation: fadeInUp 0.3s ease forwards;
+    overflow: hidden;
     
     /* Add subtle inner glow */
     position: relative;
@@ -578,6 +608,8 @@
     padding: 12px;
     border-radius: 8px;
     display: none;
+    position: relative;
+    overflow: hidden;
   }
 
   .variant-section.active {
@@ -701,6 +733,83 @@
     padding: 1px 4px;
     box-shadow: inset 0px 0px 5px 0px var(--strain-sativa), 0px 0px 14px 0px #fbbf2459;
     border-radius: 5px;
+  }
+
+  /* Sale indicator styles */
+  .price-wrapper {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 4px;
+  }
+
+  .price-display {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 2px;
+  }
+
+  /* Diagonal ribbon in top-right corner */
+  .sale-ribbon {
+    position: absolute;
+    top: 12px;
+    right: -8px;
+    background: linear-gradient(135deg, #f43f5e 0%, #dc2626 100%);
+    color: white;
+    font-size: 0.75em;
+    font-weight: 900;
+    padding: 6px 24px;
+    text-transform: uppercase;
+    letter-spacing: 1.5px;
+    transform: rotate(45deg);
+    box-shadow: 0 3px 10px rgba(244, 63, 94, 0.5);
+    z-index: 10;
+    animation: pulse-sale 2s ease-in-out infinite;
+  }
+
+  .sale-ribbon::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 100%;
+    border-left: 4px solid #991b1b;
+    border-right: 4px solid transparent;
+    border-bottom: 4px solid transparent;
+    border-top: 4px solid #991b1b;
+  }
+
+  .sale-ribbon::after {
+    content: '';
+    position: absolute;
+    right: 0;
+    top: 100%;
+    border-right: 4px solid #991b1b;
+    border-left: 4px solid transparent;
+    border-bottom: 4px solid transparent;
+    border-top: 4px solid #991b1b;
+  }
+
+  @keyframes pulse-sale {
+    0%, 100% {
+      box-shadow: 0 3px 10px rgba(244, 63, 94, 0.5);
+    }
+    50% {
+      box-shadow: 0 3px 15px rgba(244, 63, 94, 0.8);
+    }
+  }
+
+  .original-price {
+    font-size: 0.9em;
+    color: var(--text-muted);
+    text-decoration: line-through;
+    font-family: monospace;
+  }
+
+  .sale-price {
+    color: #f43f5e !important;
+    border-color: #f43f5e !important;
+    box-shadow: inset 0px 0px 5px 0px #f43f5e, 0px 0px 14px 0px rgba(244, 63, 94, 0.4) !important;
   }
 
   .stock-badge {
