@@ -274,7 +274,8 @@
       ntfyEmailEnabled: false,
       ntfyTopic: '',
       ntfyServer: 'https://ntfy.sh',
-      ntfyEmail: ''
+      ntfyEmail: '',
+      enableProductLinks: true // Enable/disable clicking products to open product page
     };
 
     let currentSettings = { ...DEFAULT_SETTINGS };
@@ -297,9 +298,18 @@
     function saveSettings(settings) {
       const oldInterval = currentSettings.checkInterval;
       const newInterval = settings.checkInterval;
+      const oldEnableProductLinks = currentSettings.enableProductLinks;
+      const newEnableProductLinks = settings.enableProductLinks;
       
       localStorage.setItem('litFarmsNotificationSettings', JSON.stringify(settings));
       currentSettings = settings;
+      
+      // Update product card data attributes if enableProductLinks changed
+      if (oldEnableProductLinks !== newEnableProductLinks) {
+        document.querySelectorAll('.product-card').forEach(card => {
+          card.dataset.linksEnabled = newEnableProductLinks;
+        });
+      }
       
       // Only restart timers if the interval changed
       if (oldInterval !== newInterval) {
@@ -604,6 +614,7 @@
             const productCard = document.createElement('div');
             productCard.className = 'product-card';
             productCard.style.animationDelay = `${index * 50}ms`; // Stagger the animations
+            productCard.dataset.linksEnabled = currentSettings.enableProductLinks;
             
             // Get filtered variants based on current filters
             const processedVariants = utils.processVariants(product);
@@ -623,6 +634,11 @@
               // Check if the click was on the COA button
               if (e.target.classList.contains('coa-button')) {
                 return; // Do nothing, let the COA button handle the click
+              }
+
+              // Check if product links are enabled
+              if (!currentSettings.enableProductLinks) {
+                return; // Do nothing if product links are disabled
               }
 
               // Regular click behavior - go to product page
@@ -799,8 +815,8 @@
       image.addEventListener('click', (e) => {
         e.stopPropagation(); // Prevent card click
         try {
-          // Pass the original image source for highest quality
-          const originalSrc = filteredImages[0].src;
+          // Use the current image src (not the captured filteredImages) so it shows the correct tier image
+          const originalSrc = image.src;
           openLightbox(originalSrc, product.title);
         } catch (error) {
           console.error('Error opening lightbox:', error);
@@ -1972,6 +1988,14 @@ Using cached data from: ${new Date(parseInt(localStorage.getItem(CACHE_TIMESTAMP
         
         lastScrollY = currentScrollY;
       });
+      
+      // Handle resize: always show filters on desktop
+      window.addEventListener('resize', () => {
+        if (window.innerWidth > 700) {
+          // Desktop view - always show filters
+          filtersContainer.classList.remove('collapsed');
+        }
+      });
     }
 
     // Document ready event listener
@@ -2070,6 +2094,7 @@ Using cached data from: ${new Date(parseInt(localStorage.getItem(CACHE_TIMESTAMP
       document.getElementById('ntfy-email').value = currentSettings.ntfyEmail;
       document.getElementById('ntfy-enabled').checked = currentSettings.ntfyAppEnabled;
       document.getElementById('email-enabled').checked = currentSettings.ntfyEmailEnabled;
+      document.getElementById('enable-product-links').checked = currentSettings.enableProductLinks ?? true;
       
       // Set notification type checkboxes
       document.getElementById('notify-new').checked = currentSettings.notifyNew;
@@ -2357,7 +2382,8 @@ Using cached data from: ${new Date(parseInt(localStorage.getItem(CACHE_TIMESTAMP
         ntfyEmailEnabled: document.getElementById('email-enabled').checked,
         ntfyTopic: document.getElementById('ntfy-topic').value.trim(),
         ntfyServer: document.getElementById('ntfy-server').value.trim() || DEFAULT_SETTINGS.ntfyServer,
-        ntfyEmail: document.getElementById('ntfy-email').value.trim()
+        ntfyEmail: document.getElementById('ntfy-email').value.trim(),
+        enableProductLinks: document.getElementById('enable-product-links').checked
       };
 
       // Update Ntfy config
@@ -3493,6 +3519,23 @@ Using cached data from: ${new Date(parseInt(localStorage.getItem(CACHE_TIMESTAMP
               <span class="settings-input-suffix">minutes</span>
             </div>
             <small class="settings-help-text">How often to check for product updates</small>
+          </div>
+          
+          <div class="settings-section">
+            <h3>Product Interaction</h3>
+            <div class="settings-toggle-group">
+              <div class="settings-toggle">
+                <input type="checkbox" id="enable-product-links" class="toggle-input" checked>
+                <label for="enable-product-links" class="toggle-label">
+                  <div class="toggle-content">
+                    <div class="toggle-title">Enable Product Links</div>
+                    <div class="toggle-description">Click on products to open the product page</div>
+                  </div>
+                  <div class="toggle-switch"></div>
+                </label>
+              </div>
+            </div>
+            <small class="settings-help-text">When disabled, you can only view images without opening product pages</small>
           </div>
           
           <div class="settings-section">

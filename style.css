@@ -229,6 +229,11 @@
     isolation: isolate;
   }
 
+  /* Change cursor when product links are disabled */
+  .product-card[data-links-enabled="false"] {
+    cursor: default;
+  }
+
   .product-card::before {
     content: '';
     position: absolute;
@@ -2093,7 +2098,9 @@
     width: 100%;
     height: 100%;
     overflow: auto;
-    background-color: rgba(0, 0, 0, 0.95);
+    background-color: rgba(0, 0, 0, 0.98);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
     align-items: center;
     justify-content: center;
     animation: fadeIn 0.3s ease;
