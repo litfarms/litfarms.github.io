@@ -408,7 +408,7 @@
     }
 
     // Update getStrainType to use the new strain data
-    function getStrainType(description, productHandle, productTitle) {
+    function getStrainType(description, productHandle, productTitle, productTags = []) {
       //console.log(`Getting strain type for ${productTitle}`);
       
       // Clean the title first since we need it for both checks
@@ -420,7 +420,15 @@
         .trim()
         .toLowerCase();
 
-      // First check if product description explicitly mentions strain type
+      // First check product tags for strain type
+      if (productTags && Array.isArray(productTags)) {
+        const tagsLower = productTags.map(tag => tag.toLowerCase());
+        if (tagsLower.includes('sativa')) return 'sativa';
+        if (tagsLower.includes('indica')) return 'indica';
+        if (tagsLower.includes('hybrid')) return 'hybrid';
+      }
+
+      // Then check if product description explicitly mentions strain type
       if (description) {
         const temp = document.createElement('div');
         temp.innerHTML = description;
@@ -431,7 +439,7 @@
         if (plainText.includes('hybrid')) return 'hybrid';
       }
 
-      // If no strain type in product description, use manual strain type
+      // If no strain type in tags or description, use manual strain type
       let strainInfo = strainData[cleanTitle];
       
       // If not found, try removing trailing 's' if present
@@ -678,10 +686,11 @@
             });
 
             // Strain type badge
-            const strainType = getStrainType(product.body_html, product.handle, product.title);
+            const strainType = getStrainType(product.body_html, product.handle, product.title, product.tags);
             const strainTypeBadge = createStrainTypeBadge(strainType);
             productCard.appendChild(strainTypeBadge);
             productCard.style.position = 'relative';
+            productCard.dataset.strainType = strainType;
 
             // Create and add product image
             const imageContainer = createProductImage(product, relevantVariants);
@@ -1147,7 +1156,7 @@
 
         // Check strain type
         if (strainTypeFilter !== 'all') {
-          const productStrainType = getStrainType(product.body_html, product.handle, product.title);
+          const productStrainType = getStrainType(product.body_html, product.handle, product.title, product.tags);
           if (productStrainType !== strainTypeFilter) {
             return false;
           }
