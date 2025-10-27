@@ -42,69 +42,75 @@
   <script>
     // Store scroll position for modals
     var modalScrollPosition = 0;
+    var lastKnownScrollPosition = window.scrollY || window.pageYOffset || 0;
+    var isModalOpen = false;
+    
+    // Track scroll position continuously (but not when modal is open)
+    window.addEventListener('scroll', function() {
+      if (!isModalOpen) {
+        var currentScroll = window.scrollY || window.pageYOffset || document.documentElement.scrollTop;
+        // Only update if it's not a sudden jump to 0 (which happens when position:fixed is applied)
+        // Allow 0 only if we were already near 0 (within 10px)
+        if (currentScroll > 0 || lastKnownScrollPosition < 10) {
+          lastKnownScrollPosition = currentScroll;
+        }
+      }
+    }, { passive: true });
     
     // Define functions immediately
+    // Generic close modal function to avoid duplication
+    function closeModal(modalId) {
+      var modal = document.getElementById(modalId);
+      if (modal && modal.style.display === 'flex') {
+        modal.style.display = 'none';
+        document.body.classList.remove('modal-open');
+        
+        // Restore body scroll
+        document.body.style.overflow = '';
+        document.body.style.paddingRight = '';
+        
+        isModalOpen = false;
+        modalScrollPosition = 0;
+      }
+    }
+    
     // Improved modal management for mobile
     window.openCartModal = function() {
       var modal = document.getElementById('cart-modal');
       if (modal && modal.style.display !== 'flex') {
-        // Save scroll position
-        modalScrollPosition = window.pageYOffset || document.documentElement.scrollTop;
+        var savedPosition = lastKnownScrollPosition;
+        isModalOpen = true;
+        modalScrollPosition = savedPosition;
+        
+        // Store scroll position and prevent body scroll without position:fixed
+        document.body.style.overflow = 'hidden';
+        document.body.style.paddingRight = (window.innerWidth - document.documentElement.clientWidth) + 'px';
         
         modal.style.display = 'flex';
         document.body.classList.add('modal-open');
         
-        // Set body top to prevent scroll jump
-        document.body.style.top = '-' + modalScrollPosition + 'px';
+        // Update cart UI if virtualCart is available
+        if (typeof virtualCart !== 'undefined') {
+          virtualCart.updateUI();
+        }
+        
+        // Check if content is scrollable and show indicator
+        setTimeout(function() {
+          if (typeof checkScrollIndicator !== 'undefined') {
+            checkScrollIndicator(modal);
+          }
+        }, 100);
       }
     };
     
     window.closeCartModal = function() {
-      var modal = document.getElementById('cart-modal');
-      if (modal && modal.style.display === 'flex') {
-        modal.style.display = 'none';
-        document.body.classList.remove('modal-open');
-        document.body.style.top = '';
-        
-        // Restore scroll position
-        window.scrollTo(0, modalScrollPosition);
-        
-        // Small delay to prevent immediate re-triggering on mobile
-        setTimeout(function() {
-          modalScrollPosition = 0;
-        }, 100);
-      }
+      closeModal('cart-modal');
     };
     
-    window.openSettingsModal = function() {
-      var modal = document.getElementById('settings-modal');
-      if (modal && modal.style.display !== 'flex') {
-        // Save scroll position
-        modalScrollPosition = window.pageYOffset || document.documentElement.scrollTop;
-        
-        modal.style.display = 'flex';
-        document.body.classList.add('modal-open');
-        
-        // Set body top to prevent scroll jump
-        document.body.style.top = '-' + modalScrollPosition + 'px';
-      }
-    };
+    // openSettingsModal is defined later with full functionality
     
     window.closeSettingsModal = function() {
-      var modal = document.getElementById('settings-modal');
-      if (modal && modal.style.display === 'flex') {
-        modal.style.display = 'none';
-        document.body.classList.remove('modal-open');
-        document.body.style.top = '';
-        
-        // Restore scroll position
-        window.scrollTo(0, modalScrollPosition);
-        
-        // Small delay to prevent immediate re-triggering on mobile
-        setTimeout(function() {
-          modalScrollPosition = 0;
-        }, 100);
-      }
+      closeModal('settings-modal');
     };
     
     // Attach event listeners immediately
@@ -1617,18 +1623,7 @@ Using cached data from: ${new Date(parseInt(localStorage.getItem(CACHE_TIMESTAMP
       return thcaProducts;
     }
 
-    // Update the preloadImages function to remove text updates
-    function preloadImages(products) {
-      return Promise.all(products.map(product => {
-        if (!product.images[0]?.src) return Promise.resolve();
-        return new Promise((resolve) => {
-          const img = new Image();
-          img.onload = () => resolve();
-          img.onerror = () => resolve();
-          img.src = product.images[0].src;
-        });
-      }));
-    }
+    // preloadImages is defined later with abort signal support
 
     // Add cleanup handler for page unload
     let pageCleanupHandlers = [];
@@ -2047,39 +2042,30 @@ Using cached data from: ${new Date(parseInt(localStorage.getItem(CACHE_TIMESTAMP
       await attemptLoad();
     });
 
-    function updateProductSelectList() {
-      const productSelect = document.getElementById('product-select');
-      productSelect.innerHTML = '';
+    // updateProductSelectList is defined later with event listener support
 
-      // Sort products alphabetically by title
-      const sortedProducts = [...products].sort((a, b) => 
-        a.title.toLowerCase().localeCompare(b.title.toLowerCase())
-      );
-
-      sortedProducts.forEach(product => {
-        const item = document.createElement('div');
-        item.className = 'product-select-item';
-        
-        const checkbox = document.createElement('input');
-        checkbox.type = 'checkbox';
-        checkbox.id = `product-${product.handle}`;
-        checkbox.value = product.handle;
-        checkbox.checked = currentSettings.specificProducts.includes(product.handle);
-        
-        const label = document.createElement('label');
-        label.htmlFor = `product-${product.handle}`;
-        label.textContent = product.title;
-        
-        item.appendChild(checkbox);
-        item.appendChild(label);
-        productSelect.appendChild(item);
-      });
-
-      // Update count
-      updateProductsSelectedCount();
-    }
-
+    // This function is called later and overrides the earlier one - need to merge scroll logic
     window.openSettingsModal = function() {
+      var modal = document.getElementById('settings-modal');
+      if (modal && modal.style.display !== 'flex') {
+        console.log('🔵 OPENING SETTINGS MODAL');
+        console.log('  BEFORE setting isModalOpen:');
+        console.log('    Current scroll (window.scrollY):', window.scrollY);
+        console.log('    lastKnownScrollPosition:', lastKnownScrollPosition);
+        
+        // Save position BEFORE setting flag
+        var savedPosition = lastKnownScrollPosition;
+        isModalOpen = true;
+        
+        console.log('  AFTER setting isModalOpen:');
+        console.log('    Current scroll (window.scrollY):', window.scrollY);
+        console.log('    lastKnownScrollPosition:', lastKnownScrollPosition);
+        console.log('    savedPosition:', savedPosition);
+        console.log('  Using scroll position:', savedPosition);
+        
+        modalScrollPosition = savedPosition;
+      }
+      
       // Load current settings into form
       document.getElementById('check-interval').value = currentSettings.checkInterval;
       document.getElementById('ntfy-topic').value = currentSettings.ntfyTopic;
@@ -2156,8 +2142,11 @@ Using cached data from: ${new Date(parseInt(localStorage.getItem(CACHE_TIMESTAMP
         });
       });
 
-      // Show modal
-      const modal = document.getElementById('settings-modal');
+      // Show modal (reuse the modal variable from above)
+      // Store scroll position and prevent body scroll without position:fixed
+      document.body.style.overflow = 'hidden';
+      document.body.style.paddingRight = (window.innerWidth - document.documentElement.clientWidth) + 'px';
+      
       modal.style.display = 'flex';
       document.body.classList.add('modal-open');
       
@@ -3074,16 +3063,8 @@ Using cached data from: ${new Date(parseInt(localStorage.getItem(CACHE_TIMESTAMP
       }
     };
 
-    // Enhance the existing openCartModal to update UI
-    const originalOpenCartModal = window.openCartModal;
-    window.openCartModal = function() {
-      virtualCart.updateUI();
-      originalOpenCartModal();
-      
-      // Check if content is scrollable and show indicator
-      const modal = document.getElementById('cart-modal');
-      setTimeout(() => checkScrollIndicator(modal), 100);
-    }
+    // openCartModal already includes virtualCart.updateUI() and checkScrollIndicator
+    // No need to wrap it again
 
     function checkout() {
       if (virtualCart.items.length === 0) return;
