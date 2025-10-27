@@ -3034,8 +3034,8 @@ Using cached data from: ${new Date(parseInt(localStorage.getItem(CACHE_TIMESTAMP
           
           // Format price display: show breakdown if quantity > 1
           const priceDisplay = item.quantity > 1 
-            ? `$${item.price.toFixed(2)} × ${item.quantity} = $${(item.price * item.quantity).toFixed(2)}`
-            : `$${item.price.toFixed(2)}`;
+            ? `<span class="price-unit">$${item.price.toFixed(2)}</span> <span class="price-multiply">×</span> <span class="price-qty">${item.quantity}</span> <span class="price-equals">=</span> <span class="price-total">$${(item.price * item.quantity).toFixed(2)}</span>`
+            : `<span class="price-single">$${item.price.toFixed(2)}</span>`;
           
           return `
           <div class="cart-item" data-tier="${tier}">
