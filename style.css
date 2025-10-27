@@ -511,25 +511,28 @@
 
   .variant-tab {
     flex: 1;
-    padding: 10px 12px;
+    padding: 10px 8px;
     background: rgba(255, 255, 255, 0.05);
     border: none;
     border-radius: 8px 8px 0 0;
     cursor: pointer;
-    font-size: 0.95em;
+    font-size: 0.9em;
     font-weight: 600;
     transition: all 0.2s ease;
     color: var(--text-secondary);
     display: flex;
     align-items: center;
     justify-content: center;
-    gap: 6px;
+    gap: 4px;
     position: relative;
     bottom: -2px;
     touch-action: manipulation;
     -webkit-tap-highlight-color: transparent;
     user-select: none;
     -webkit-user-select: none;
+    min-width: 0;
+    overflow: visible;
+    white-space: nowrap;
   }
 
   .variant-tab:hover {
@@ -597,9 +600,10 @@
   }
 
   .variant-tab-icon {
-    width: 18px;
-    height: 18px;
+    width: 16px;
+    height: 16px;
     display: inline-block;
+    flex-shrink: 0;
     transition: opacity 0.2s ease;
   }
 
