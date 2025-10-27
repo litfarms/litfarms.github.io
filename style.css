@@ -1681,7 +1681,6 @@
   .cart-total {
     text-align: right;
     font-weight: bold;
-    font-size: 1.2em;
     color: var(--accent-primary);
   }
 
