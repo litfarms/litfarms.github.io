@@ -47,7 +47,7 @@
     // Improved modal management for mobile
     window.openCartModal = function() {
       var modal = document.getElementById('cart-modal');
-      if (modal) {
+      if (modal && modal.style.display !== 'flex') {
         // Save scroll position
         modalScrollPosition = window.pageYOffset || document.documentElement.scrollTop;
         
@@ -63,7 +63,7 @@
     
     window.closeCartModal = function() {
       var modal = document.getElementById('cart-modal');
-      if (modal) {
+      if (modal && modal.style.display === 'flex') {
         modal.style.display = 'none';
         document.body.classList.remove('modal-open');
         document.body.style.top = '';
@@ -72,12 +72,17 @@
         if (window.innerWidth > 700) {
           window.scrollTo(0, modalScrollPosition);
         }
+        
+        // Small delay to prevent immediate re-triggering on mobile
+        setTimeout(function() {
+          modalScrollPosition = 0;
+        }, 100);
       }
     };
     
     window.openSettingsModal = function() {
       var modal = document.getElementById('settings-modal');
-      if (modal) {
+      if (modal && modal.style.display !== 'flex') {
         // Save scroll position
         modalScrollPosition = window.pageYOffset || document.documentElement.scrollTop;
         
@@ -93,7 +98,7 @@
     
     window.closeSettingsModal = function() {
       var modal = document.getElementById('settings-modal');
-      if (modal) {
+      if (modal && modal.style.display === 'flex') {
         modal.style.display = 'none';
         document.body.classList.remove('modal-open');
         document.body.style.top = '';
@@ -102,6 +107,11 @@
         if (window.innerWidth > 700) {
           window.scrollTo(0, modalScrollPosition);
         }
+        
+        // Small delay to prevent immediate re-triggering on mobile
+        setTimeout(function() {
+          modalScrollPosition = 0;
+        }, 100);
       }
     };
     
@@ -109,20 +119,21 @@
     var settingsBtn = document.getElementById('settings-button');
     var cartBtn = document.getElementById('virtual-cart-button');
     
-    // Multiple event types for maximum compatibility
-    ['click', 'touchend'].forEach(function(eventType) {
-      settingsBtn.addEventListener(eventType, function(e) {
-        e.preventDefault();
-        e.stopPropagation();
-        window.openSettingsModal();
-      }, false);
-      
-      cartBtn.addEventListener(eventType, function(e) {
-        e.preventDefault();
-        e.stopPropagation();
-        window.openCartModal();
-      }, false);
-    });
+    // Use touch events on mobile, click on desktop to prevent double-firing
+    var isTouchDevice = 'ontouchstart' in window || navigator.maxTouchPoints > 0;
+    var eventType = isTouchDevice ? 'touchend' : 'click';
+    
+    settingsBtn.addEventListener(eventType, function(e) {
+      e.preventDefault();
+      e.stopPropagation();
+      window.openSettingsModal();
+    }, { passive: false });
+    
+    cartBtn.addEventListener(eventType, function(e) {
+      e.preventDefault();
+      e.stopPropagation();
+      window.openCartModal();
+    }, { passive: false });
     
     // Show buttons after delay on mobile, immediately on desktop
     var isMobile = window.innerWidth <= 700;
@@ -2012,22 +2023,7 @@ Using cached data from: ${new Date(parseInt(localStorage.getItem(CACHE_TIMESTAMP
         }
       });
 
-      // Settings modal with event capture
-      const settingsButton = document.getElementById('settings-button');
-      settingsButton.addEventListener('click', (e) => {
-        e.stopPropagation();
-        e.preventDefault();
-        openSettingsModal();
-      }, true);
-      
-      // Prevent touch events from passing through
-      settingsButton.addEventListener('touchstart', (e) => {
-        e.stopPropagation();
-      }, { capture: true, passive: true });
-      
-      settingsButton.addEventListener('touchend', (e) => {
-        e.stopPropagation();
-      }, { capture: true, passive: true });
+      // Settings button event listener already attached at top of file
       document.querySelector('.close-modal').addEventListener('click', closeSettingsModal);
       document.querySelector('.save-settings').addEventListener('click', saveSettingsFromForm);
 
@@ -3155,22 +3151,7 @@ Using cached data from: ${new Date(parseInt(localStorage.getItem(CACHE_TIMESTAMP
     document.addEventListener('DOMContentLoaded', () => {
       virtualCart.loadFromLocalStorage();
       
-      // Add cart button click handler with event capture
-      const cartButton = document.getElementById('virtual-cart-button');
-      cartButton.addEventListener('click', (e) => {
-        e.stopPropagation();
-        e.preventDefault();
-        openCartModal();
-      }, true); // Use capture phase
-      
-      // Prevent any touch events from passing through
-      cartButton.addEventListener('touchstart', (e) => {
-        e.stopPropagation();
-      }, { capture: true, passive: true });
-      
-      cartButton.addEventListener('touchend', (e) => {
-        e.stopPropagation();
-      }, { capture: true, passive: true });
+      // Cart button event listener already attached at top of file
 
       // Track mousedown position for cart modal
       let cartModalMouseDown = false;
