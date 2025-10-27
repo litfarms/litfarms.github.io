@@ -84,7 +84,11 @@
         
         // Store scroll position and prevent body scroll without position:fixed
         document.body.style.overflow = 'hidden';
-        document.body.style.paddingRight = (window.innerWidth - document.documentElement.clientWidth) + 'px';
+        // Only add padding compensation on desktop (where scrollbars take up space)
+        var scrollbarWidth = window.innerWidth - document.documentElement.clientWidth;
+        if (scrollbarWidth > 0) {
+          document.body.style.paddingRight = scrollbarWidth + 'px';
+        }
         
         modal.style.display = 'flex';
         document.body.classList.add('modal-open');
@@ -2145,7 +2149,11 @@ Using cached data from: ${new Date(parseInt(localStorage.getItem(CACHE_TIMESTAMP
       // Show modal (reuse the modal variable from above)
       // Store scroll position and prevent body scroll without position:fixed
       document.body.style.overflow = 'hidden';
-      document.body.style.paddingRight = (window.innerWidth - document.documentElement.clientWidth) + 'px';
+      // Only add padding compensation on desktop (where scrollbars take up space)
+      var scrollbarWidth = window.innerWidth - document.documentElement.clientWidth;
+      if (scrollbarWidth > 0) {
+        document.body.style.paddingRight = scrollbarWidth + 'px';
+      }
       
       modal.style.display = 'flex';
       document.body.classList.add('modal-open');

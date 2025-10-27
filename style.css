@@ -839,7 +839,7 @@
     align-items: center;
     justify-content: center;
     overflow: hidden; /* Prevent background scroll */
-    padding: 10px;
+    padding: 0;
   }
   
   .modal-overlay[style*="display: flex"] {
@@ -848,7 +848,7 @@
   
   @media (max-width: 700px) {
     .modal-overlay {
-      padding: 10px;
+      padding: 0;
     }
   }
 
@@ -870,10 +870,10 @@
   /* Mobile specific modal adjustments */
   @media (max-width: 700px) {
     .modal {
-      width: calc(100% - 20px);
-      max-width: calc(100% - 20px);
+      width: calc(100% - 40px);
+      max-width: calc(100% - 40px);
       max-height: 85vh;
-      margin: 0 auto;
+      margin: 0;
     }
   }
 
@@ -1646,7 +1646,7 @@
     z-index: 1001;
     align-items: center;
     justify-content: center;
-    padding: 10px;
+    padding: 0;
     overflow: hidden; /* Prevent background scroll */
   }
   
@@ -1656,7 +1656,7 @@
   
   @media (max-width: 700px) {
     .cart-modal {
-      padding: 10px;
+      padding: 0;
     }
   }
 
@@ -1678,10 +1678,10 @@
   /* Mobile specific cart modal adjustments */
   @media (max-width: 700px) {
     .cart-modal-content {
-      width: calc(100% - 20px);
-      max-width: calc(100% - 20px);
+      width: calc(100% - 40px);
+      max-width: calc(100% - 40px);
       max-height: 85vh;
-      margin: 0 auto;
+      margin: 0;
     }
   }
   
@@ -2666,8 +2666,8 @@
   /* Mobile Responsive */
   @media (max-width: 700px) {
     .settings-modal {
-      max-width: 100%;
-      width: 95%;
+      max-width: calc(100% - 40px);
+      width: calc(100% - 40px);
       max-height: 90vh;
     }
     
