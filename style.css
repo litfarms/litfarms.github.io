@@ -844,7 +844,7 @@
     justify-content: center;
     overflow: hidden; /* Prevent background scroll */
     padding: 0;
-    touch-action: none; /* Prevent all touch interactions */
+    touch-action: pan-y; /* Allow vertical scrolling within modal but prevent background scroll */
     pointer-events: auto; /* Ensure overlay captures all pointer events */
   }
   
@@ -871,8 +871,9 @@
     overflow: hidden;
     will-change: transform, opacity; /* Optimize animations */
     transform: translateZ(0); /* Force GPU acceleration */
-    touch-action: auto; /* Allow touch interactions within modal content */
+    touch-action: manipulation; /* Enable immediate touch interactions */
     pointer-events: auto; /* Ensure modal content is interactive */
+    isolation: isolate; /* Create new stacking context for better touch handling */
   }
   
   /* Mobile specific modal adjustments */
@@ -904,6 +905,14 @@
     padding: 20px 20px 15px 20px;
     border-bottom: 1px solid var(--border-glow);
     flex-shrink: 0;
+    touch-action: manipulation;
+  }
+  
+  /* Ensure header close button is immediately interactive */
+  .modal-header button {
+    touch-action: manipulation;
+    -webkit-tap-highlight-color: transparent;
+    pointer-events: auto;
   }
 
   .modal-content {
@@ -912,6 +921,9 @@
     padding: 20px;
     scrollbar-width: thin;
     scrollbar-color: var(--accent-primary) var(--bg-elevated);
+    /* Ensure immediate touch responsiveness */
+    touch-action: manipulation;
+    -webkit-tap-highlight-color: transparent;
   }
 
   .modal-content::-webkit-scrollbar {
@@ -932,6 +944,18 @@
     background: var(--accent-secondary);
   }
 
+  /* Ensure all interactive elements in modals are immediately responsive */
+  .modal-content button,
+  .modal-content input,
+  .modal-content select,
+  .modal-content textarea,
+  .modal-content label,
+  .modal-content a {
+    touch-action: manipulation;
+    -webkit-tap-highlight-color: transparent;
+    pointer-events: auto;
+  }
+
   .modal-footer {
     padding: 15px 20px;
     border-top: 1px solid var(--border-glow);
@@ -940,6 +964,14 @@
     gap: 10px;
     flex-shrink: 0;
     position: relative;
+    touch-action: manipulation;
+  }
+  
+  /* Ensure footer buttons are immediately interactive */
+  .modal-footer button {
+    touch-action: manipulation;
+    -webkit-tap-highlight-color: transparent;
+    pointer-events: auto;
   }
   
   /* Scroll indicator shadow - shows when content is scrollable */

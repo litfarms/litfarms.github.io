@@ -3156,28 +3156,22 @@ Using cached data from: ${new Date(parseInt(localStorage.getItem(CACHE_TIMESTAMP
       cartModal.addEventListener('touchstart', (e) => {
         if (e.target === cartModal) {
           cartModalMouseDown = true;
-          e.preventDefault();
-          e.stopPropagation();
         }
-      }, { passive: false });
+      }, { passive: true });
 
       cartModal.addEventListener('touchmove', (e) => {
+        // Only prevent if touching the overlay itself, not modal content
         if (e.target === cartModal) {
           e.preventDefault();
-          e.stopPropagation();
         }
       }, { passive: false });
 
       cartModal.addEventListener('touchend', (e) => {
-        if (e.target === cartModal) {
-          e.preventDefault();
-          e.stopPropagation();
-          if (cartModalMouseDown) {
-            closeCartModal();
-          }
+        if (e.target === cartModal && cartModalMouseDown) {
+          closeCartModal();
         }
         cartModalMouseDown = false;
-      }, { passive: false });
+      }, { passive: true });
 
       // Reset flag when mouse leaves modal
       cartModal.addEventListener('mouseleave', () => {
@@ -3205,28 +3199,22 @@ Using cached data from: ${new Date(parseInt(localStorage.getItem(CACHE_TIMESTAMP
       settingsModal.addEventListener('touchstart', (e) => {
         if (e.target === settingsModal) {
           settingsModalMouseDown = true;
-          e.preventDefault();
-          e.stopPropagation();
         }
-      }, { passive: false });
+      }, { passive: true });
 
       settingsModal.addEventListener('touchmove', (e) => {
+        // Only prevent if touching the overlay itself, not modal content
         if (e.target === settingsModal) {
           e.preventDefault();
-          e.stopPropagation();
         }
       }, { passive: false });
 
       settingsModal.addEventListener('touchend', (e) => {
-        if (e.target === settingsModal) {
-          e.preventDefault();
-          e.stopPropagation();
-          if (settingsModalMouseDown) {
-            closeSettingsModal();
-          }
+        if (e.target === settingsModal && settingsModalMouseDown) {
+          closeSettingsModal();
         }
         settingsModalMouseDown = false;
-      }, { passive: false });
+      }, { passive: true });
 
       // Reset flag when mouse leaves modal
       settingsModal.addEventListener('mouseleave', () => {
