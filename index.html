@@ -3032,6 +3032,11 @@ Using cached data from: ${new Date(parseInt(localStorage.getItem(CACHE_TIMESTAMP
           
           const tierBadge = tier ? `<span class="cart-tier-badge tier-${tier.toLowerCase()}">${getTierIcon(tier)}${tier}</span>` : '';
           
+          // Format price display: show breakdown if quantity > 1
+          const priceDisplay = item.quantity > 1 
+            ? `$${item.price.toFixed(2)} × ${item.quantity} = $${(item.price * item.quantity).toFixed(2)}`
+            : `$${item.price.toFixed(2)}`;
+          
           return `
           <div class="cart-item" data-tier="${tier}">
             <div class="cart-item-info">
@@ -3040,7 +3045,7 @@ Using cached data from: ${new Date(parseInt(localStorage.getItem(CACHE_TIMESTAMP
                 ${tierBadge}
                 <span>${cleanVariantTitle}</span>
               </div>
-              <div class="cart-item-price">$${(item.price * item.quantity).toFixed(2)}</div>
+              <div class="cart-item-price">${priceDisplay}</div>
             </div>
             <div class="cart-item-controls">
               <div class="quantity-controls">
