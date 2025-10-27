@@ -99,11 +99,11 @@
         }
         
         // Check if content is scrollable and show indicator
-        setTimeout(function() {
+        requestAnimationFrame(function() {
           if (typeof checkScrollIndicator !== 'undefined') {
             checkScrollIndicator(modal);
           }
-        }, 100);
+        });
       }
     };
     
@@ -2040,6 +2040,10 @@ Using cached data from: ${new Date(parseInt(localStorage.getItem(CACHE_TIMESTAMP
         modalMouseDown = false;
       });
 
+      // Initialize modal tabs and chips early so they're ready when modal opens
+      initializeSettingsTabs();
+      initializeFilterChipListeners();
+
       let retryCount = 0;
       const maxRetries = 3;
 
@@ -2146,14 +2150,11 @@ Using cached data from: ${new Date(parseInt(localStorage.getItem(CACHE_TIMESTAMP
       modal.style.display = 'flex';
       document.body.classList.add('modal-open');
       
-      // Initialize tab switching if not already done (only once)
-      initializeSettingsTabs();
-      
-      // Just sync the state, don't re-add listeners
+      // Just sync the checkbox state (listeners already attached on page load)
       syncNewFilterChipsState();
       
       // Check if content is scrollable and show indicator
-      setTimeout(() => checkScrollIndicator(modal), 100);
+      requestAnimationFrame(() => checkScrollIndicator(modal));
     }
     
     // Initialize settings tabs (only runs once)
@@ -2217,22 +2218,19 @@ Using cached data from: ${new Date(parseInt(localStorage.getItem(CACHE_TIMESTAMP
       });
     }
     
-    // Just sync the checkbox states (no listener adding)
+    // Just sync the checkbox states (listeners already initialized on page load)
     function syncNewFilterChipsState() {
       const tierSelect = document.getElementById('notification-tier');
       const weightSelect = document.getElementById('notification-weight');
       
-      // Initialize listeners on first call
-      initializeFilterChipListeners();
-      
-      // Sync tier chips state only
+      // Sync tier chips state only (fast operation)
       const tierChips = document.querySelectorAll('#tier-chips-new input[type="checkbox"]');
       tierChips.forEach(chip => {
         const isSelected = Array.from(tierSelect.selectedOptions).some(opt => opt.value === chip.value);
         chip.checked = isSelected;
       });
       
-      // Sync weight chips state only
+      // Sync weight chips state only (fast operation)
       const weightChips = document.querySelectorAll('#weight-chips-new input[type="checkbox"]');
       weightChips.forEach(chip => {
         const isSelected = Array.from(weightSelect.selectedOptions).some(opt => opt.value === chip.value);
