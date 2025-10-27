@@ -44,6 +44,7 @@
     var modalScrollPosition = 0;
     
     // Define functions immediately
+    // Improved modal management for mobile
     window.openCartModal = function() {
       var modal = document.getElementById('cart-modal');
       if (modal) {
@@ -52,7 +53,11 @@
         
         modal.style.display = 'flex';
         document.body.classList.add('modal-open');
-        document.body.style.top = '-' + modalScrollPosition + 'px';
+        
+        // Only use position fixed on desktop to avoid mobile issues
+        if (window.innerWidth > 700) {
+          document.body.style.top = '-' + modalScrollPosition + 'px';
+        }
       }
     };
     
@@ -63,8 +68,10 @@
         document.body.classList.remove('modal-open');
         document.body.style.top = '';
         
-        // Restore scroll position
-        window.scrollTo(0, modalScrollPosition);
+        // Restore scroll position only on desktop
+        if (window.innerWidth > 700) {
+          window.scrollTo(0, modalScrollPosition);
+        }
       }
     };
     
@@ -76,7 +83,11 @@
         
         modal.style.display = 'flex';
         document.body.classList.add('modal-open');
-        document.body.style.top = '-' + modalScrollPosition + 'px';
+        
+        // Only use position fixed on desktop to avoid mobile issues
+        if (window.innerWidth > 700) {
+          document.body.style.top = '-' + modalScrollPosition + 'px';
+        }
       }
     };
     
@@ -87,8 +98,10 @@
         document.body.classList.remove('modal-open');
         document.body.style.top = '';
         
-        // Restore scroll position
-        window.scrollTo(0, modalScrollPosition);
+        // Restore scroll position only on desktop
+        if (window.innerWidth > 700) {
+          window.scrollTo(0, modalScrollPosition);
+        }
       }
     };
     
@@ -2267,10 +2280,7 @@ Using cached data from: ${new Date(parseInt(localStorage.getItem(CACHE_TIMESTAMP
       }
     }
 
-    function closeSettingsModal() {
-      document.getElementById('settings-modal').style.display = 'none';
-      document.body.classList.remove('modal-open');
-    }
+    // closeSettingsModal is already defined globally at the top
 
     // Sync mobile chips with desktop selects
     function syncMobileChips() {
@@ -3076,20 +3086,15 @@ Using cached data from: ${new Date(parseInt(localStorage.getItem(CACHE_TIMESTAMP
       }
     };
 
-    // Cart Modal Functions - defined globally for onclick handlers
+    // Enhance the existing openCartModal to update UI
+    const originalOpenCartModal = window.openCartModal;
     window.openCartModal = function() {
       virtualCart.updateUI();
-      const modal = document.getElementById('cart-modal');
-      modal.style.display = 'flex';
-      document.body.classList.add('modal-open');
+      originalOpenCartModal();
       
       // Check if content is scrollable and show indicator
+      const modal = document.getElementById('cart-modal');
       setTimeout(() => checkScrollIndicator(modal), 100);
-    }
-
-    window.closeCartModal = function() {
-      document.getElementById('cart-modal').style.display = 'none';
-      document.body.classList.remove('modal-open');
     }
 
     function checkout() {
