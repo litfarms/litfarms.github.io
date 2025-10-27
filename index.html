@@ -880,7 +880,7 @@
                 addButton.textContent = 'Add to Cart';
                 addButton.onclick = (e) => {
                   e.stopPropagation();
-                  virtualCart.addItem(product, variant);
+                  virtualCart.addItem(product, variant, e.currentTarget);
                 };
                 row.appendChild(addButton);
               }
@@ -2862,12 +2862,11 @@ Using cached data from: ${new Date(parseInt(localStorage.getItem(CACHE_TIMESTAMP
     const virtualCart = {
       items: [],
       
-      addItem(product, variant) {
+      addItem(product, variant, buttonElement) {
         // Add visual feedback to the clicked button
-        const clickedButton = document.activeElement;
-        if (clickedButton && clickedButton.classList.contains('add-to-cart-button')) {
-          clickedButton.classList.add('clicked');
-          setTimeout(() => clickedButton.classList.remove('clicked'), 300);
+        if (buttonElement && buttonElement.classList.contains('add-to-cart-button')) {
+          buttonElement.classList.add('clicked');
+          setTimeout(() => buttonElement.classList.remove('clicked'), 400);
         }
 
         const existingItemIndex = this.items.findIndex(item => item.variantId === variant.id);
@@ -3284,7 +3283,7 @@ Using cached data from: ${new Date(parseInt(localStorage.getItem(CACHE_TIMESTAMP
             addButton.textContent = 'Add to Cart';
             addButton.onclick = (e) => {
               e.stopPropagation();
-              virtualCart.addItem(product, variant);
+              virtualCart.addItem(product, variant, e.currentTarget);
             };
             row.appendChild(addButton);
           }

@@ -1551,6 +1551,11 @@
     transform: scale(1.02);
   }
 
+  .add-to-cart-button:active {
+    transform: scale(0.95);
+    background-color: var(--accent-secondary);
+  }
+
   .add-to-cart-button:disabled {
     background-color: var(--text-muted);
     cursor: not-allowed;
