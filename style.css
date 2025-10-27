@@ -258,8 +258,8 @@
     border-color: rgba(251, 191, 36, 0.2);
     background: linear-gradient(
       160deg,
-      color-mix(in srgb, var(--bg-secondary) 85%, var(--strain-sativa)) 0%,
-      color-mix(in srgb, var(--bg-secondary) 75%, var(--strain-sativa)) 100%
+      color-mix(in srgb, var(--bg-secondary) 92%, var(--strain-sativa)) 0%,
+      color-mix(in srgb, var(--bg-secondary) 85%, var(--strain-sativa)) 100%
     );
     box-shadow: 0 4px 12px rgba(251, 191, 36, 0.08);
   }
@@ -268,8 +268,8 @@
     border-color: rgba(139, 92, 246, 0.2);
     background: linear-gradient(
       160deg,
-      color-mix(in srgb, var(--bg-secondary) 85%, var(--strain-indica)) 0%,
-      color-mix(in srgb, var(--bg-secondary) 75%, var(--strain-indica)) 100%
+      color-mix(in srgb, var(--bg-secondary) 92%, var(--strain-indica)) 0%,
+      color-mix(in srgb, var(--bg-secondary) 85%, var(--strain-indica)) 100%
     );
     box-shadow: 0 4px 12px rgba(139, 92, 246, 0.08);
   }
@@ -278,8 +278,8 @@
     border-color: rgba(34, 197, 94, 0.2);
     background: linear-gradient(
       160deg,
-      color-mix(in srgb, var(--bg-secondary) 85%, var(--strain-hybrid)) 0%,
-      color-mix(in srgb, var(--bg-secondary) 75%, var(--strain-hybrid)) 100%
+      color-mix(in srgb, var(--bg-secondary) 92%, var(--strain-hybrid)) 0%,
+      color-mix(in srgb, var(--bg-secondary) 85%, var(--strain-hybrid)) 100%
     );
     box-shadow: 0 4px 12px rgba(34, 197, 94, 0.08);
   }
