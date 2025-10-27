@@ -139,7 +139,7 @@
     
     // Show buttons after delay on mobile, immediately on desktop
     var isMobile = window.innerWidth <= 700;
-    var delay = isMobile ? 2000 : 0; // 5 seconds on mobile, instant on desktop
+    var delay = isMobile ? 500 : 0; // 5 seconds on mobile, instant on desktop
     
     setTimeout(function() {
       settingsBtn.style.opacity = '1';
@@ -2052,21 +2052,9 @@ Using cached data from: ${new Date(parseInt(localStorage.getItem(CACHE_TIMESTAMP
     window.openSettingsModal = function() {
       var modal = document.getElementById('settings-modal');
       if (modal && modal.style.display !== 'flex') {
-        console.log('🔵 OPENING SETTINGS MODAL');
-        console.log('  BEFORE setting isModalOpen:');
-        console.log('    Current scroll (window.scrollY):', window.scrollY);
-        console.log('    lastKnownScrollPosition:', lastKnownScrollPosition);
-        
         // Save position BEFORE setting flag
         var savedPosition = lastKnownScrollPosition;
         isModalOpen = true;
-        
-        console.log('  AFTER setting isModalOpen:');
-        console.log('    Current scroll (window.scrollY):', window.scrollY);
-        console.log('    lastKnownScrollPosition:', lastKnownScrollPosition);
-        console.log('    savedPosition:', savedPosition);
-        console.log('  Using scroll position:', savedPosition);
-        
         modalScrollPosition = savedPosition;
       }
       
@@ -3150,10 +3138,86 @@ Using cached data from: ${new Date(parseInt(localStorage.getItem(CACHE_TIMESTAMP
         }
         cartModalMouseDown = false;
       });
+      
+      // Touch support for cart modal - prevent background scrolling
+      cartModal.addEventListener('touchstart', (e) => {
+        if (e.target === cartModal) {
+          cartModalMouseDown = true;
+          e.preventDefault();
+          e.stopPropagation();
+        }
+      }, { passive: false });
+
+      cartModal.addEventListener('touchmove', (e) => {
+        if (e.target === cartModal) {
+          e.preventDefault();
+          e.stopPropagation();
+        }
+      }, { passive: false });
+
+      cartModal.addEventListener('touchend', (e) => {
+        if (e.target === cartModal) {
+          e.preventDefault();
+          e.stopPropagation();
+          if (cartModalMouseDown) {
+            closeCartModal();
+          }
+        }
+        cartModalMouseDown = false;
+      }, { passive: false });
 
       // Reset flag when mouse leaves modal
       cartModal.addEventListener('mouseleave', () => {
         cartModalMouseDown = false;
+      });
+      
+      // Track mousedown position for settings modal
+      let settingsModalMouseDown = false;
+      const settingsModal = document.getElementById('settings-modal');
+      
+      settingsModal.addEventListener('mousedown', (e) => {
+        if (e.target === settingsModal) {
+          settingsModalMouseDown = true;
+        }
+      });
+
+      settingsModal.addEventListener('mouseup', (e) => {
+        if (e.target === settingsModal && settingsModalMouseDown) {
+          closeSettingsModal();
+        }
+        settingsModalMouseDown = false;
+      });
+      
+      // Touch support for settings modal - prevent background scrolling
+      settingsModal.addEventListener('touchstart', (e) => {
+        if (e.target === settingsModal) {
+          settingsModalMouseDown = true;
+          e.preventDefault();
+          e.stopPropagation();
+        }
+      }, { passive: false });
+
+      settingsModal.addEventListener('touchmove', (e) => {
+        if (e.target === settingsModal) {
+          e.preventDefault();
+          e.stopPropagation();
+        }
+      }, { passive: false });
+
+      settingsModal.addEventListener('touchend', (e) => {
+        if (e.target === settingsModal) {
+          e.preventDefault();
+          e.stopPropagation();
+          if (settingsModalMouseDown) {
+            closeSettingsModal();
+          }
+        }
+        settingsModalMouseDown = false;
+      }, { passive: false });
+
+      // Reset flag when mouse leaves modal
+      settingsModal.addEventListener('mouseleave', () => {
+        settingsModalMouseDown = false;
       });
     });
 
