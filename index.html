@@ -289,10 +289,17 @@
       ntfyTopic: '',
       ntfyServer: 'https://ntfy.sh',
       ntfyEmail: '',
-      enableProductLinks: true // Enable/disable clicking products to open product page
+      enableProductLinks: true, // Enable/disable clicking products to open product page
+      theme: 'blue' // Theme: 'blue' or 'red'
     };
 
     let currentSettings = { ...DEFAULT_SETTINGS };
+
+    // Theme management
+    function applyTheme(theme) {
+      document.body.classList.remove('theme-blue', 'theme-red');
+      document.body.classList.add(`theme-${theme}`);
+    }
 
     function loadSettings() {
       const savedSettings = localStorage.getItem('litFarmsNotificationSettings');
@@ -305,6 +312,8 @@
       NTFY_CONFIG.topic = currentSettings.ntfyTopic;
       NTFY_CONFIG.server = currentSettings.ntfyServer;
       NTFY_CONFIG.email = currentSettings.ntfyEmail;
+      // Apply theme
+      applyTheme(currentSettings.theme || 'blue');
       return currentSettings;
     }
 
@@ -2235,6 +2244,7 @@ Using cached data from: ${new Date(parseInt(localStorage.getItem(CACHE_TIMESTAMP
       }
       
       // Load current settings into form
+      document.getElementById('theme-select').value = currentSettings.theme || 'blue';
       document.getElementById('check-interval').value = currentSettings.checkInterval;
       document.getElementById('ntfy-topic').value = currentSettings.ntfyTopic;
       document.getElementById('ntfy-server').value = currentSettings.ntfyServer;
@@ -2530,7 +2540,8 @@ Using cached data from: ${new Date(parseInt(localStorage.getItem(CACHE_TIMESTAMP
         ntfyTopic: document.getElementById('ntfy-topic').value.trim(),
         ntfyServer: document.getElementById('ntfy-server').value.trim() || DEFAULT_SETTINGS.ntfyServer,
         ntfyEmail: document.getElementById('ntfy-email').value.trim(),
-        enableProductLinks: document.getElementById('enable-product-links').checked
+        enableProductLinks: document.getElementById('enable-product-links').checked,
+        theme: document.getElementById('theme-select').value
       };
 
       // Update Ntfy config
@@ -2539,6 +2550,9 @@ Using cached data from: ${new Date(parseInt(localStorage.getItem(CACHE_TIMESTAMP
       NTFY_CONFIG.topic = newSettings.ntfyTopic;
       NTFY_CONFIG.server = newSettings.ntfyServer;
       NTFY_CONFIG.email = newSettings.ntfyEmail;
+
+      // Apply theme
+      applyTheme(newSettings.theme);
 
       // Log the settings being saved
       console.log('Saving settings:', newSettings);
@@ -3690,6 +3704,17 @@ Using cached data from: ${new Date(parseInt(localStorage.getItem(CACHE_TIMESTAMP
       <div class="modal-content">
         <!-- General Tab -->
         <div class="settings-tab-content active" data-content="general">
+          <div class="settings-section">
+            <h3>Theme</h3>
+            <div class="settings-input-group">
+              <select id="theme-select" class="settings-input">
+                <option value="blue">Blue (Default)</option>
+                <option value="red">Red</option>
+              </select>
+            </div>
+            <small class="settings-help-text">Choose your preferred color theme</small>
+          </div>
+
           <div class="settings-section">
             <h3>Update Frequency</h3>
             <div class="settings-input-group">
