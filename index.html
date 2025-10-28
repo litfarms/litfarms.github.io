@@ -783,6 +783,41 @@
     }
 
     // Helper functions for rendering
+    // Helper function to check if an image is the logo
+    function isLogoImage(imageSrc) {
+      if (!imageSrc) return false;
+      return imageSrc.includes('litfarms-logo-circle-profile.jpg');
+    }
+
+    // Helper function to find a suitable image, skipping the logo
+    function findSuitableImage(images, variantIds = null) {
+      if (!images || images.length === 0) return null;
+      
+      let candidateImages = images;
+      
+      // If variant IDs provided, try to find matching variant images first
+      if (variantIds && variantIds.size > 0) {
+        const variantImages = images.filter(img => 
+          img.variant_ids && 
+          img.variant_ids.some(id => variantIds.has(id)) &&
+          !isLogoImage(img.src)
+        );
+        
+        if (variantImages.length > 0) {
+          return variantImages[0];
+        }
+      }
+      
+      // Fall back to first non-logo image
+      const nonLogoImages = images.filter(img => !isLogoImage(img.src));
+      if (nonLogoImages.length > 0) {
+        return nonLogoImages[0];
+      }
+      
+      // If all images are logos, return the first one anyway
+      return images[0];
+    }
+
     function createStrainTypeBadge(strainType) {
       const badge = document.createElement('div');
       badge.className = 'strain-type-badge';
@@ -825,33 +860,27 @@
       imageContainer.appendChild(imageWrapper);
 
       // Filter images based on variants
-      let filteredImages = [];
+      let selectedImage = null;
       if (product.images && product.images.length > 0) {
         if (relevantVariants.length === product.variants.length) {
           // Show all images if all variants are selected
-          filteredImages = [product.images[0]]; // Just use first image
+          selectedImage = findSuitableImage(product.images);
         } else {
           // Get set of relevant variant IDs
           const relevantVariantIds = new Set(relevantVariants.map(v => v.id));
           
-          // Try to find first image that matches a variant
-          const variantImage = product.images.find(img => 
-            img.variant_ids && 
-            img.variant_ids.some(id => relevantVariantIds.has(id))
-          );
-          
-          // Use variant image if found, otherwise use first product image
-          filteredImages = [variantImage || product.images[0]];
+          // Find suitable image, skipping logo
+          selectedImage = findSuitableImage(product.images, relevantVariantIds);
         }
       }
 
       // Use placeholder if no images available
-      if (filteredImages.length === 0) {
-        filteredImages = [{ src: 'https://via.placeholder.com/300' }];
+      if (!selectedImage) {
+        selectedImage = { src: 'https://via.placeholder.com/300' };
       }
 
       // Set the image source
-      image.src = filteredImages[0].src;
+      image.src = selectedImage.src;
 
       // Add click handler to open lightbox with original high-res image
       image.addEventListener('click', (e) => {
@@ -3387,11 +3416,8 @@ Using cached data from: ${new Date(parseInt(localStorage.getItem(CACHE_TIMESTAMP
       // Get variant IDs for this tier
       const tierVariantIds = new Set(tierVariants.map(v => v.id));
       
-      // Find image that matches any variant in this tier
-      const tierImage = product.images.find(img => 
-        img.variant_ids && 
-        img.variant_ids.some(id => tierVariantIds.has(id))
-      );
+      // Find suitable image that matches any variant in this tier, skipping logo
+      const tierImage = findSuitableImage(product.images, tierVariantIds);
       
       // Update image
       if (tierImage && tierImage.src !== imageElement.src) {
