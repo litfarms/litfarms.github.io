@@ -996,13 +996,20 @@
         const temp = document.createElement('div');
         temp.innerHTML = product.body_html;
         
-        // Find any link that contains the text "Click here for product COA"
+        // Find and extract COA button
+        let coaButton = null;
         const links = temp.getElementsByTagName('a');
-        for (const link of links) {
-          if (link.textContent.toLowerCase().includes('click here for product coa')) {
-            link.className = 'coa-button';
-            link.textContent = 'View COA';
-            link.target = '_blank';
+        for (let i = links.length - 1; i >= 0; i--) {
+          const link = links[i];
+          const linkText = link.textContent.toLowerCase();
+          // Check for both variations: "click here for product coa" and "click here to see product coa"
+          if (linkText.includes('click here') && linkText.includes('product coa')) {
+            // Create the COA button
+            coaButton = document.createElement('a');
+            coaButton.className = 'coa-button';
+            coaButton.textContent = 'View COA';
+            coaButton.target = '_blank';
+            coaButton.href = link.href;
             
             // Get the original href
             const originalUrl = link.href;
@@ -1010,25 +1017,36 @@
             // Check if it's a PDF link (look for .pdf anywhere in the URL)
             if (originalUrl.toLowerCase().includes('.pdf')) {
               // Use Google Docs viewer for PDFs
-              // Extract the base URL without query parameters
               const baseUrl = originalUrl.split('?')[0];
-              link.href = `https://docs.google.com/viewer?url=${encodeURIComponent(baseUrl)}&embedded=true`;
+              coaButton.href = `https://docs.google.com/viewer?url=${encodeURIComponent(baseUrl)}&embedded=true`;
             }
             
             // Add event listener to stop propagation
-            link.addEventListener('click', (e) => {
-              e.stopPropagation(); // Stop the event from bubbling up
+            coaButton.addEventListener('click', (e) => {
+              e.stopPropagation();
             });
+            
+            // Remove the original link from temp
+            link.parentNode.removeChild(link);
           }
         }
         
         const plainText = temp.textContent
-          .replace(/click here for product coa/gi, '')
+          .replace(/click here (for|to see) product coa/gi, '')
           .replace(/\s+/g, ' ')
           .trim();
           
         if (plainText.length > 10) {
-          description.innerHTML = temp.innerHTML;
+          // Create a wrapper for the text content
+          const contentWrapper = document.createElement('div');
+          contentWrapper.className = 'description-content';
+          contentWrapper.innerHTML = temp.innerHTML;
+          
+          // Add content first, then COA button at bottom
+          description.appendChild(contentWrapper);
+          if (coaButton) {
+            description.appendChild(coaButton);
+          }
         } else {
           // Fall back to manual strain description
           const cleanStrainName = product.title
@@ -1054,6 +1072,15 @@
 
         const leaflyData = strainData[cleanStrainName];
         description.innerHTML = leaflyData?.description || 'No description available.';
+      }
+      
+      // Function to check if description has scrollable content
+      function checkScrollable(desc) {
+        if (desc && desc.scrollHeight > desc.clientHeight) {
+          desc.classList.add('has-scroll');
+        } else if (desc) {
+          desc.classList.remove('has-scroll');
+        }
       }
       
       // Toggle functionality - expand all cards in the same row
@@ -1084,6 +1111,8 @@
               desc.classList.remove('collapsed');
               btn.querySelector('span').textContent = 'Hide Info';
               btn.classList.add('expanded');
+              // Check if scrollable after expansion
+              setTimeout(() => checkScrollable(desc), 100);
             } else {
               desc.classList.add('collapsed');
               btn.querySelector('span').textContent = 'Show Info';
